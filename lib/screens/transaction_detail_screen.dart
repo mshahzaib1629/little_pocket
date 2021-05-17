@@ -131,7 +131,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                 ),
                 minLines: 3,
                 maxLines: 15,
-              )
+              ),
             ],
           ),
         ),

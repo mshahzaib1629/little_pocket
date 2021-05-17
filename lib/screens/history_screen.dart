@@ -23,27 +23,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: Text('Little Pocket'),
       ),
       drawer: AppDrawer(),
-      body: Stack(
-        children: [
-          Consumer<TransactionProvider>(
-            builder: (context, transactionSnap, _) {
-              List<Transaction> _transactions = transactionSnap.myTransactions;
-              return ListView.builder(
-                  itemCount: _transactions.length,
-                  itemBuilder: (context, index) => Column(
-                        children: [
-                          HistoryCard(_transactions[index]),
-                          // if (index != _transactions.length - 1)
-                          Divider(
-                            height: 0,
-                            color: Colors.black26,
-                          ),
-                        ],
-                      ));
-            },
-          ),
-          HistoryScreenFloatingButton(),
-        ],
+      floatingActionButton: HistoryScreenFloatingButton(),
+      body: Consumer<TransactionProvider>(
+        builder: (context, transactionSnap, _) {
+          List<Transaction> _transactions = transactionSnap.myTransactions;
+          return ListView.builder(
+              itemCount: _transactions.length,
+              itemBuilder: (context, index) => Column(
+                    children: [
+                      HistoryCard(_transactions[index]),
+                      // if (index != _transactions.length - 1)
+                      Divider(
+                        height: 0,
+                        color: Colors.black26,
+                      ),
+                    ],
+                  ));
+        },
       ),
     );
   }
