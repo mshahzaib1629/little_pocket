@@ -11,7 +11,7 @@ class AppTheme {
   );
   static String dateFormat = 'EEE, dd MMM yyyy';
 
-  static String dateTimeFormat = 'EEE, dd MMM yyyy AT hh:mm a';
+  static String dateTimeFormat = 'EEE, dd MMM yyyy \n hh:mm a';
 
   static Color incomeColor = primaryColor;
   static IconData incomeIcon = Icons.arrow_downward;
@@ -25,6 +25,11 @@ class AppTheme {
 
   static TextStyle tagTextStyle = TextStyle(
     color: Colors.white,
+  );
+
+  static TextStyle miniTableHeadingStyle = TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
   );
 
   static TextStyle addTagBtnTextStyle = TextStyle(

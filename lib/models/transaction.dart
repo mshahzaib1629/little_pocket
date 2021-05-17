@@ -1,4 +1,5 @@
 import '../helpers/enums.dart';
+import './mini_transaction.dart';
 import 'tag.dart';
 
 class Transaction {
@@ -8,6 +9,7 @@ class Transaction {
   double amount;
   TransactionType transactionType;
   BalanceChange balanceChange;
+  List<MiniTransaction> miniTransactionList;
   String description;
 
   Transaction({
@@ -16,6 +18,7 @@ class Transaction {
     this.dateTime,
     this.amount,
     this.balanceChange,
+    this.miniTransactionList,
     this.transactionType,
     this.description,
   });

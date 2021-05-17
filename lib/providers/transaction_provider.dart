@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:little_pocket/helpers/enums.dart';
+import 'package:little_pocket/models/mini_transaction.dart';
 import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/models/transaction.dart';
 
@@ -19,17 +20,36 @@ class TransactionProvider with ChangeNotifier {
       dateTime: DateTime.now(),
     ),
     Transaction(
-      id: '1',
-      tag: Tag(
-        id: 'a',
-        name: 'Bill Payment',
-      ),
-      amount: 1500,
-      transactionType: TransactionType.Expense,
-      balanceChange: BalanceChange.Decrement,
-      description: 'Paid for electricity bill',
-      dateTime: DateTime.now(),
-    ),
+        id: '1',
+        tag: Tag(
+          id: 'a',
+          name: 'Bill Payment',
+        ),
+        amount: 1500,
+        transactionType: TransactionType.Expense,
+        balanceChange: BalanceChange.Decrement,
+        description: 'Paid for electricity bill',
+        dateTime: DateTime.now(),
+        miniTransactionList: [
+          MiniTransaction(
+            id: '2',
+            name: 'Electricity',
+            amount: 700,
+            balanceChange: BalanceChange.Decrement,
+          ),
+          MiniTransaction(
+            id: '2',
+            name: 'PTCL',
+            amount: 900,
+            balanceChange: BalanceChange.Decrement,
+          ),
+          MiniTransaction(
+            id: '2',
+            name: 'Discount',
+            amount: 100,
+            balanceChange: BalanceChange.Icrement,
+          ),
+        ]),
     Transaction(
       id: '1',
       tag: Tag(
