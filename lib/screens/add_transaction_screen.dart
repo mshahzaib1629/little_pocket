@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/helpers/styling.dart';
+import 'package:little_pocket/models/mini_transaction.dart';
 import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/providers/tag_provider.dart';
+import 'package:little_pocket/widgets/add_mini_transaction_button.dart';
 import 'package:little_pocket/widgets/add_tag_button.dart';
 import 'package:little_pocket/widgets/tag_card.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +21,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _amountTextController = TextEditingController();
   final _descriptionTextController = TextEditingController();
   Tag _selectedTag;
+
+  List<MiniTransaction> _miniTransactionList = [];
   Color _pageThemeColor() {
     Color color = AppTheme.adjustmentColor;
     if (widget.transactionType == TransactionType.Income)
@@ -105,47 +109,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildAmountField() {
     return TextFormField(
       controller: _amountTextController,
-      decoration: InputDecoration(
+      decoration: AppTheme.inputDecoration(_pageThemeColor()).copyWith(
         labelText: 'Amount in Rupees',
-        labelStyle: TextStyle(
-          color: _pageThemeColor(),
-          fontSize: 20,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
       ),
       keyboardType: TextInputType.number,
       minLines: 1,
@@ -156,53 +121,136 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildDescriptionField() {
     return TextField(
       controller: _descriptionTextController,
-      decoration: InputDecoration(
+      decoration: AppTheme.inputDecoration(_pageThemeColor()).copyWith(
         labelText: 'Description',
-        labelStyle: TextStyle(
-          color: _pageThemeColor(),
-          fontSize: 20,
-        ),
         hintText:
             'Enter detail about this ${getEnumStringValue(widget.transactionType.toString())}',
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
       ),
       textCapitalization: TextCapitalization.sentences,
       minLines: 3,
       maxLines: 15,
+    );
+  }
+
+  var tableItem = (Widget textWidget) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: textWidget,
+      );
+
+  List<TableRow> _buildMiniTableContent() {
+    return _miniTransactionList
+        .map((miniTransaction) => TableRow(children: [
+              tableItem(Text('${miniTransaction.name}')),
+              tableItem(Text('Rs. ${miniTransaction.amount.toString()}')),
+              tableItem(Text(
+                miniTransaction.balanceChange == BalanceChange.Icrement
+                    ? '+'
+                    : '-',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: miniTransaction.balanceChange == BalanceChange.Icrement
+                      ? AppTheme.amountIcrementColor
+                      : AppTheme.amountDecrementColor,
+                ),
+                textAlign: TextAlign.center,
+              )),
+              tableItem(InkWell(
+                onTap: () {},
+                child: Icon(
+                  Icons.edit,
+                  color: _pageThemeColor(),
+                  size: 16,
+                ),
+              )),
+            ]))
+        .toList();
+  }
+
+  void _addToMiniList(MiniTransaction miniTransaction) {
+    setState(() {
+      _miniTransactionList.add(miniTransaction);
+    });
+  }
+
+  Widget _buildMiniTable() {
+    return Container(
+      child: InputDecorator(
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.all(13),
+          labelText: 'Mini Table',
+          labelStyle: TextStyle(
+            color: _pageThemeColor(),
+            fontSize: 20,
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: _pageThemeColor(),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: _pageThemeColor(),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: _miniTransactionList.isEmpty
+            ? Theme(
+                data:
+                    Theme.of(context).copyWith(accentColor: _pageThemeColor()),
+                child: AddMiniTransactionButton(
+                  addToList: _addToMiniList,
+                ))
+            : Table(
+                columnWidths: {
+                  2: FlexColumnWidth(0.4),
+                  3: FlexColumnWidth(0.2),
+                },
+                border: TableBorder.symmetric(
+                  inside: BorderSide(
+                    color: Colors.black26,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                children: [
+                  TableRow(
+                    children: [
+                      tableItem(Text(
+                        'Item',
+                        style: AppTheme.miniTableHeadingStyle
+                            .copyWith(color: _pageThemeColor()),
+                        textAlign: TextAlign.center,
+                      )),
+                      tableItem(Text(
+                        'Amount',
+                        style: AppTheme.miniTableHeadingStyle
+                            .copyWith(color: _pageThemeColor()),
+                        textAlign: TextAlign.center,
+                      )),
+                      tableItem(Text(
+                        '+ / -',
+                        style: AppTheme.miniTableHeadingStyle
+                            .copyWith(color: _pageThemeColor()),
+                        textAlign: TextAlign.center,
+                      )),
+                      tableItem(InkWell(
+                        onTap: null,
+                        child: Icon(
+                          Icons.edit,
+                          color: _pageThemeColor(),
+                          size: 16,
+                        ),
+                      )),
+                    ],
+                  ),
+                  ..._buildMiniTableContent(),
+                ],
+              ),
+      ),
     );
   }
 
@@ -235,6 +283,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       height: 15,
                     ),
                     _buildDescriptionField(),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    _buildMiniTable(),
+                    if (_miniTransactionList.isNotEmpty)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Theme(
+                            data: Theme.of(context)
+                                .copyWith(accentColor: _pageThemeColor()),
+                            child: AddMiniTransactionButton(
+                              addToList: _addToMiniList,
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),

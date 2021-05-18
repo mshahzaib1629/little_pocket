@@ -7,7 +7,6 @@ import 'package:little_pocket/providers/transaction_provider.dart';
 import 'package:little_pocket/screens/add_transaction_screen.dart';
 import 'package:little_pocket/screens/app_drawer.dart';
 import 'package:little_pocket/widgets/history_card.dart';
-import 'package:little_pocket/widgets/history_screen_floating_button.dart';
 import 'package:provider/provider.dart';
 
 class HistoryScreen extends StatefulWidget {

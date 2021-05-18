@@ -63,14 +63,6 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
 
   Widget _buildMiniTable() {
     return Container(
-      // decoration: BoxDecoration(
-      //   border: Border.all(
-      //     color: _pageThemeColor(),
-      //     style: BorderStyle.solid,
-      //     width: 2,
-      //   ),
-      //   borderRadius: BorderRadius.circular(8),
-      // ),
       child: InputDecorator(
         decoration: InputDecoration(
           contentPadding: EdgeInsets.all(13),
@@ -118,7 +110,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                   textAlign: TextAlign.center,
                 )),
                 tableItem(Text(
-                  '</>',
+                  '+ / -',
                   style: AppTheme.miniTableHeadingStyle
                       .copyWith(color: _pageThemeColor()),
                   textAlign: TextAlign.center,
@@ -136,49 +128,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return TextField(
       controller: _descriptionTextController,
       enabled: false,
-      decoration: InputDecoration(
+      decoration: AppTheme.inputDecoration(_pageThemeColor()).copyWith(
         labelText: 'Description',
-        labelStyle: TextStyle(
-          color: _pageThemeColor(),
-          fontSize: 20,
-        ),
         hintText:
             'Enter detail about this ${getEnumStringValue(widget.transaction.transactionType.toString())}',
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: _pageThemeColor(),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
       ),
       minLines: 3,
       maxLines: 15,

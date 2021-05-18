@@ -35,4 +35,48 @@ class AppTheme {
   static TextStyle addTagBtnTextStyle = TextStyle(
     color: Colors.black,
   );
+
+  static InputDecoration inputDecoration(color) => InputDecoration(
+        labelStyle: TextStyle(
+          color: color,
+          fontSize: 20,
+        ),
+        filled: false,
+        fillColor: color.withOpacity(0.15),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: color,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: color,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: color,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: color,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: color,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      );
 }
