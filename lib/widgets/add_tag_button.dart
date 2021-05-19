@@ -43,32 +43,17 @@ class AddTagButton extends StatelessWidget {
                     if (value.isEmpty) return 'Tag name should not be empty!';
                     return null;
                   },
-                  decoration: InputDecoration(
+                  decoration:
+                      AppTheme.inputDecoration(Theme.of(context).accentColor)
+                          .copyWith(
+                    labelText: 'Tag Name',
+                    labelStyle: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).accentColor,
+                    ),
                     filled: true,
-                    fillColor: Theme.of(context).accentColor.withOpacity(0.15),
-                    hintText: 'Tag Name',
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                      gapPadding: 5,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                      gapPadding: 5,
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                      gapPadding: 5,
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(16),
-                      gapPadding: 5,
-                    ),
                   ),
                 ),
               ),

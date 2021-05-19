@@ -23,6 +23,12 @@ enum EnumType {
   TagType,
 }
 
+enum ArthmeticOperation {
+  Add,
+  Edit,
+  Delete,
+}
+
 // To convert String value (enum) to enum value
 dynamic getEnumValue({EnumType type, String enumString}) {
   if (type == EnumType.TransactionType) {

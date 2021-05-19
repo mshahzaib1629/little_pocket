@@ -4,7 +4,7 @@ import 'package:little_pocket/helpers/styling.dart';
 import 'package:little_pocket/models/mini_transaction.dart';
 import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/providers/tag_provider.dart';
-import 'package:little_pocket/widgets/add_mini_transaction_button.dart';
+import 'package:little_pocket/widgets/mini_transaction_button.dart';
 import 'package:little_pocket/widgets/add_tag_button.dart';
 import 'package:little_pocket/widgets/tag_card.dart';
 import 'package:provider/provider.dart';
@@ -155,16 +155,39 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
                 textAlign: TextAlign.center,
               )),
-              tableItem(InkWell(
-                onTap: () {},
-                child: Icon(
-                  Icons.edit,
-                  color: _pageThemeColor(),
-                  size: 16,
+              tableItem(Theme(
+                data:
+                    Theme.of(context).copyWith(accentColor: _pageThemeColor()),
+                child: MiniTransactionButton(
+                  operationType: ArthmeticOperation.Edit,
+                  itemName: miniTransaction.name,
+                  amount: miniTransaction.amount,
+                  balanceChange: miniTransaction.balanceChange,
+                  editOrDelete: ({miniTrans, operation}) =>
+                      _editOrDeleteMiniTransaction(
+                    index: _miniTransactionList.indexOf(miniTransaction),
+                    miniTransaction: miniTrans,
+                    operation: operation,
+                  ),
                 ),
               )),
             ]))
         .toList();
+  }
+
+  void _editOrDeleteMiniTransaction({
+    int index,
+    MiniTransaction miniTransaction,
+    ArthmeticOperation operation,
+  }) {
+    if (operation == ArthmeticOperation.Edit)
+      setState(() {
+        _miniTransactionList[index] = miniTransaction;
+      });
+    else if (operation == ArthmeticOperation.Delete)
+      setState(() {
+        _miniTransactionList.removeAt(index);
+      });
   }
 
   void _addToMiniList(MiniTransaction miniTransaction) {
@@ -202,13 +225,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ? Theme(
                 data:
                     Theme.of(context).copyWith(accentColor: _pageThemeColor()),
-                child: AddMiniTransactionButton(
+                child: MiniTransactionButton(
+                  operationType: ArthmeticOperation.Add,
                   addToList: _addToMiniList,
+                  balanceChange:
+                      widget.transactionType == TransactionType.Expense
+                          ? BalanceChange.Decrement
+                          : BalanceChange.Icrement,
                 ))
             : Table(
                 columnWidths: {
-                  2: FlexColumnWidth(0.4),
-                  3: FlexColumnWidth(0.2),
+                  2: FlexColumnWidth(0.5),
+                  3: FlexColumnWidth(0.3),
                 },
                 border: TableBorder.symmetric(
                   inside: BorderSide(
@@ -242,7 +270,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         child: Icon(
                           Icons.edit,
                           color: _pageThemeColor(),
-                          size: 16,
+                          size: 20,
                         ),
                       )),
                     ],
@@ -294,8 +322,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           Theme(
                             data: Theme.of(context)
                                 .copyWith(accentColor: _pageThemeColor()),
-                            child: AddMiniTransactionButton(
+                            child: MiniTransactionButton(
+                              operationType: ArthmeticOperation.Add,
                               addToList: _addToMiniList,
+                              balanceChange: widget.transactionType ==
+                                      TransactionType.Expense
+                                  ? BalanceChange.Decrement
+                                  : BalanceChange.Icrement,
                             ),
                           ),
                         ],
