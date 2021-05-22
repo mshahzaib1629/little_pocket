@@ -12,4 +12,9 @@ class MiniTransaction {
     this.amount,
     this.balanceChange,
   });
+
+  @override
+  String toString() {
+    return '{id: $id, name: $name, amount: $amount, balanceChange: ${balanceChange.toString()}}';
+  }
 }

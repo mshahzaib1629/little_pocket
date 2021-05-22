@@ -13,6 +13,7 @@ class MiniTransactionButton extends StatelessWidget {
   final Function({MiniTransaction miniTrans, ArthmeticOperation operation})
       editOrDelete;
   final ArthmeticOperation operationType;
+  final String buttonTitle;
 
   String orignalItemName;
   String orignalAmount;
@@ -20,6 +21,7 @@ class MiniTransactionButton extends StatelessWidget {
   MiniTransactionButton({
     this.addToList,
     this.editOrDelete,
+    this.buttonTitle,
     balanceChange,
     @required this.operationType,
     String itemName,
@@ -27,7 +29,7 @@ class MiniTransactionButton extends StatelessWidget {
   }) {
     if (operationType == ArthmeticOperation.Edit) {
       orignalItemName = itemName;
-      orignalAmount = amount.toString();
+      orignalAmount = amount.toStringAsFixed(0);
     }
     if (balanceChange != null) {
       originalBalanceChange = balanceChange;
@@ -199,11 +201,11 @@ class MiniTransactionButton extends StatelessWidget {
         ? ElevatedButton(
             onPressed: () => _onTap(context),
             child: Text(
-              'Add Mini Transaction',
+              buttonTitle,
               textAlign: TextAlign.left,
             ),
             style: ElevatedButton.styleFrom(
-              primary: Theme.of(context).accentColor.withOpacity(0.5),
+              primary: Theme.of(context).accentColor.withOpacity(0.8),
               shadowColor: Colors.transparent,
             ),
           )

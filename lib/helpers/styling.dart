@@ -32,8 +32,20 @@ class AppTheme {
     fontSize: 16,
   );
 
+  static TextStyle formSubmitButtonTextStyle = TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+  );
+
   static TextStyle addTagBtnTextStyle = TextStyle(
     color: Colors.black,
+  );
+
+  static TextStyle errorTextStyle = TextStyle(
+    color: Colors.red,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
   );
 
   static InputDecoration inputDecoration(color) => InputDecoration(
@@ -42,6 +54,7 @@ class AppTheme {
           fontSize: 20,
         ),
         filled: false,
+        errorStyle: errorTextStyle,
         fillColor: color.withOpacity(0.15),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(

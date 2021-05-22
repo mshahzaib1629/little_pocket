@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/models/tag.dart';
 
 class TagProvider with ChangeNotifier {
@@ -51,13 +52,11 @@ class TagProvider with ChangeNotifier {
     return _expenseTagsDummy;
   }
 
-  Future<void> getIncomeTags() async {
-    // fetch Adjustment Tag along with Income Tags
+  Future<void> fetchTags(TagType tagType) async {
+    // fetch Adjustment Tag along with Income / Expense Tags
   }
 
-  Future<void> getExpenseTags() async {
-    // fetch Adjustment Tag along with Expense Tags
+  Future<Tag> getAdjustmentTagOnly() async {
+    return Tag(id: '1', name: 'Adjustment dummy');
   }
-
-  Future<Tag> getAdjustmentTag() async {}
 }
