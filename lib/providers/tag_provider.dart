@@ -1,62 +1,64 @@
 import 'package:flutter/cupertino.dart';
 import 'package:little_pocket/helpers/enums.dart';
+import 'package:little_pocket/helpers/local_db_helper.dart';
 import 'package:little_pocket/models/tag.dart';
 
 class TagProvider with ChangeNotifier {
   List<Tag> _incomeTags = [];
   List<Tag> _expenseTags = [];
 
-  List<Tag> _incomeTagsDummy = [
-    Tag(
-      id: '2',
-      name: 'Papa',
-    ),
-    Tag(
-      id: '2',
-      name: 'Bank Withdrawl',
-    ),
-    Tag(
-      id: '2',
-      name: 'Jazz Cash',
-    ),
-    Tag(
-      id: '2',
-      name: 'Adjustment',
-    ),
-  ];
-
-  List<Tag> _expenseTagsDummy = [
-    Tag(
-      id: '2',
-      name: 'Bill Payments',
-    ),
-    Tag(
-      id: '2',
-      name: 'Mobile Recharge',
-    ),
-    Tag(
-      id: '2',
-      name: 'Bought Utilities',
-    ),
-    Tag(
-      id: '2',
-      name: 'Adjustment',
-    ),
-  ];
-
   List<Tag> get incomeTags {
-    return _incomeTagsDummy;
+    return _incomeTags;
   }
 
   List<Tag> get expenseTags {
-    return _expenseTagsDummy;
+    return _expenseTags;
   }
 
   Future<void> fetchTags(TagType tagType) async {
-    // fetch Adjustment Tag along with Income / Expense Tags
+    try {
+      // @TODO: fetch Adjustment Tag along with Income / Expense Tags
+      var tagsFetched = await LocalDatabase.getTagsOfType(tagType);
+      List<Tag> tagsParsed = tagsFetched.map((e) => Tag.fromMap(e)).toList();
+      Tag adjustmentTag = await getAdjustmentTagOnly();
+      if (adjustmentTag != null) tagsParsed.add(adjustmentTag);
+      if (tagType == TagType.Income)
+        _incomeTags = tagsParsed;
+      else if (tagType == TagType.Expense) _expenseTags = tagsParsed;
+
+      notifyListeners();
+    } catch (error) {
+      print('error from fetchTags: \n$error');
+      throw error;
+    }
+  }
+
+  Future<void> addNewTag(Tag tag) async {
+    try {
+      int id = await LocalDatabase.insert('tags', tag.toMap());
+      tag.id = id;
+      print('tag added successfully');
+      print(tag.toString());
+      if (tag.tagType == TagType.Income)
+        _incomeTags.add(tag);
+      else
+        _expenseTags.add(tag);
+      notifyListeners();
+    } catch (error) {
+      print('error from addNewTag: \n$error');
+      throw error;
+    }
   }
 
   Future<Tag> getAdjustmentTagOnly() async {
-    return Tag(id: '1', name: 'Adjustment dummy');
+    try {
+      var tagFetched = await LocalDatabase.getTagsOfType(TagType.Adjustment);
+      if (tagFetched.isEmpty) return null;
+      Tag adjustmentTag = Tag.fromMap(tagFetched[0]);
+      return adjustmentTag;
+    } catch (error) {
+      print('error from getAdjustmentTagOnly: \n$error');
+      throw error;
+    }
   }
 }

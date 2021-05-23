@@ -8,9 +8,9 @@ class TransactionProvider with ChangeNotifier {
   List<Transaction> _myTransactions = [];
   List<Transaction> _dummyTransactions = [
     Transaction(
-      id: '1',
+      id: 1,
       tag: Tag(
-        id: 'a',
+        id: 2,
         name: 'Papa',
       ),
       amount: 2500,
@@ -20,9 +20,9 @@ class TransactionProvider with ChangeNotifier {
       dateTime: DateTime.now(),
     ),
     Transaction(
-        id: '1',
+        id: 4,
         tag: Tag(
-          id: 'a',
+          id: 2,
           name: 'Bill Payment',
         ),
         amount: 1500,
@@ -32,28 +32,28 @@ class TransactionProvider with ChangeNotifier {
         dateTime: DateTime.now(),
         miniTransactionList: [
           MiniTransaction(
-            id: '2',
+            id: 5,
             name: 'Electricity',
             amount: 700,
             balanceChange: BalanceChange.Decrement,
           ),
           MiniTransaction(
-            id: '2',
+            id: 2,
             name: 'PTCL',
             amount: 900,
             balanceChange: BalanceChange.Decrement,
           ),
           MiniTransaction(
-            id: '2',
+            id: 2,
             name: 'Discount',
             amount: 100,
             balanceChange: BalanceChange.Icrement,
           ),
         ]),
     Transaction(
-      id: '1',
+      id: 2,
       tag: Tag(
-        id: 'a',
+        id: 2,
         name: 'Bought Utilities',
       ),
       amount: 300,
@@ -63,9 +63,9 @@ class TransactionProvider with ChangeNotifier {
       dateTime: DateTime.now(),
     ),
     Transaction(
-      id: '1',
+      id: 2,
       tag: Tag(
-        id: 'a',
+        id: 1,
         name: 'Adjustment',
       ),
       amount: 150,
@@ -74,9 +74,9 @@ class TransactionProvider with ChangeNotifier {
       dateTime: DateTime.now(),
     ),
     Transaction(
-      id: '1',
+      id: 1,
       tag: Tag(
-        id: 'a',
+        id: 1,
         name: 'Bank',
       ),
       amount: 2000,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/models/tag.dart';
 import '../helpers/styling.dart';
 import '../models/tag.dart';
@@ -78,7 +79,7 @@ class TagCard extends StatelessWidget {
                   .copyWith(color: isHighlighted ? Colors.white : Colors.black),
             ),
           ),
-          if (editable)
+          if (editable && tag.tagType != TagType.Adjustment)
             InkWell(
               onTap: () => _onDeletePressed(context),
               child: Icon(

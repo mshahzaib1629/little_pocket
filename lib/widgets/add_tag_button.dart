@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/helpers/styling.dart';
 import 'package:little_pocket/models/tag.dart';
 
@@ -6,12 +7,17 @@ class AddTagButton extends StatelessWidget {
   final _key = GlobalKey<FormState>();
   final _tagController = TextEditingController();
   final Function(Tag tag) addToTagList;
+  final TagType tagType;
 
-  AddTagButton({this.addToTagList});
+  AddTagButton({this.tagType, this.addToTagList});
 
   Future<void> _addTag(context) {
     print(_tagController.text);
-    Tag tag = Tag(name: _tagController.text);
+    Tag tag = Tag(
+        name: _tagController.text,
+        tagType: tagType,
+        lastTimeUsed: DateTime.now(),
+        isActive: true);
     addToTagList(tag);
     _tagController.text = '';
     Navigator.pop(context);

@@ -6,6 +6,7 @@ import 'package:little_pocket/models/mini_transaction.dart';
 import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/models/transaction.dart';
 import 'package:little_pocket/providers/tag_provider.dart';
+import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/mini_transaction_button.dart';
 import 'package:little_pocket/widgets/add_tag_button.dart';
 import 'package:little_pocket/widgets/tag_card.dart';
@@ -46,8 +47,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<void> _fetchTags() async {
     try {
       final tagProvider = Provider.of<TagProvider>(context, listen: false);
-
-      // after fetching tags, check if transactionType is Adjustment
       if (widget.transactionType != TransactionType.Adjustment) {
         TagType tagType = TagType.Income;
         if (widget.transactionType == TransactionType.Expense)
@@ -61,6 +60,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
     } catch (error) {
       print('error from _fetchTags: \n$error');
+      showDefaultErrorMsg(context);
     }
   }
 
@@ -99,7 +99,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
-  Future<void> addToTagList(Tag tag) async {}
+  Future<void> addToTagList(Tag tag) async {
+    try {
+      final tagProvider = Provider.of<TagProvider>(context, listen: false);
+      tagProvider.addNewTag(tag);
+    } catch (error) {
+      print('error from addToTagList: \n$error');
+      showDefaultErrorMsg(context);
+    }
+  }
 
   List<Widget> _getTags(List<Tag> tags, Color highlightedColor) {
     List<Widget> tagsToDisplay = [];
@@ -120,7 +128,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
       ));
     }
-    tagsToDisplay.add(AddTagButton(addToTagList: addToTagList));
+    TagType currentTagType = TagType.Income;
+    if (widget.transactionType == TransactionType.Expense)
+      currentTagType = TagType.Expense;
+    tagsToDisplay
+        .add(AddTagButton(tagType: currentTagType, addToTagList: addToTagList));
     return tagsToDisplay;
   }
 
@@ -155,6 +167,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             initiallyExpanded: true,
             title: Text(
                 '${getEnumStringValue(widget.transactionType.toString())} Tags'),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            expandedAlignment: Alignment.topLeft,
             children: [
               Padding(
                 padding: const EdgeInsets.only(

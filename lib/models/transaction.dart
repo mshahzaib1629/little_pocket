@@ -3,7 +3,7 @@ import './mini_transaction.dart';
 import 'tag.dart';
 
 class Transaction {
-  String id;
+  int id;
   Tag tag;
   DateTime dateTime;
   double amount;
