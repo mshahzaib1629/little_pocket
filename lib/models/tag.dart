@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:little_pocket/helpers/enums.dart';
 
 class Tag {
@@ -38,7 +39,8 @@ class Tag {
         type: EnumType.TagType,
         enumString: tagObj['tagType'],
       ),
-      lastTimeUsed: null,
+      lastTimeUsed: DateFormat('yyyy-MM-ddThh:mm:ss', 'en_US')
+          .parse(tagObj['lastTimeUsed']),
       isActive: tagObj['isActive'] == 1 ? true : false,
     );
     return tag;

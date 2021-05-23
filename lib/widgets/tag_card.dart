@@ -8,7 +8,7 @@ class TagCard extends StatelessWidget {
   final int index;
   final Tag tag;
   final bool editable;
-  final Function(int index) removeFromTagList;
+  final Function(Tag tag) removeFromTagList;
   final bool isHighlighted;
   final Color highlightedColor;
   TagCard({
@@ -21,7 +21,7 @@ class TagCard extends StatelessWidget {
   });
 
   void _delete(context) {
-    removeFromTagList(index);
+    removeFromTagList(tag);
     Navigator.pop(context);
   }
 

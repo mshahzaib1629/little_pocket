@@ -41,12 +41,19 @@ class LocalDatabase {
   static Future<List<Map<String, dynamic>>> getTagsOfType(
       TagType tagType) async {
     final db = await LocalDatabase.database();
-    return db
-        .query('tags', where: 'tagType = ?', whereArgs: [tagType.toString()]);
+    return db.query('tags',
+        where: 'tagType = ? AND isActive = ?',
+        whereArgs: [tagType.toString(), 1]);
   }
 
   static Future<void> delete(String table, int id) async {
     final db = await LocalDatabase.database();
-    db.delete(table, where: 'id = ?', whereArgs: [id]);
+    await db.delete(table, where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<void> update(
+      String table, int id, Map<String, dynamic> data) async {
+    final db = await LocalDatabase.database();
+    await db.update(table, data, where: 'id = ?', whereArgs: [id]);
   }
 }

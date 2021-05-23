@@ -37,8 +37,6 @@ class TagProvider with ChangeNotifier {
     try {
       int id = await LocalDatabase.insert('tags', tag.toMap());
       tag.id = id;
-      print('tag added successfully');
-      print(tag.toString());
       if (tag.tagType == TagType.Income)
         _incomeTags.add(tag);
       else
@@ -56,6 +54,21 @@ class TagProvider with ChangeNotifier {
       if (tagFetched.isEmpty) return null;
       Tag adjustmentTag = Tag.fromMap(tagFetched[0]);
       return adjustmentTag;
+    } catch (error) {
+      print('error from getAdjustmentTagOnly: \n$error');
+      throw error;
+    }
+  }
+
+  Future<void> deleteTag(Tag tag) async {
+    try {
+      tag.isActive = false;
+      await LocalDatabase.update('tags', tag.id, tag.toMap());
+      if (tag.tagType == TagType.Income)
+        _incomeTags.remove(tag);
+      else
+        _expenseTags.remove(tag);
+      notifyListeners();
     } catch (error) {
       print('error from getAdjustmentTagOnly: \n$error');
       throw error;

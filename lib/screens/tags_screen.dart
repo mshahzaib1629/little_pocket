@@ -41,8 +41,11 @@ class _TagScreenState extends State<TagScreen> {
     }
   }
 
-  Future<void> removeFromTagList(int index) async {
-    try {} catch (error) {
+  Future<void> removeFromTagList(Tag tag) async {
+    try {
+      final tagProvider = Provider.of<TagProvider>(context, listen: false);
+      await tagProvider.deleteTag(tag);
+    } catch (error) {
       print('error from removeFromTagList: \n$error');
       showDefaultErrorMsg(context);
     }

@@ -29,6 +29,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   BalanceChange _balanceChange;
 
   List<MiniTransaction> _miniTransactionList = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -46,6 +47,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Future<void> _fetchTags() async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       final tagProvider = Provider.of<TagProvider>(context, listen: false);
       if (widget.transactionType != TransactionType.Adjustment) {
         TagType tagType = TagType.Income;
@@ -61,6 +65,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     } catch (error) {
       print('error from _fetchTags: \n$error');
       showDefaultErrorMsg(context);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -368,18 +376,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           ),
         ),
         child: _miniTransactionList.isEmpty
-            ? Theme(
-                data:
-                    Theme.of(context).copyWith(accentColor: _pageThemeColor()),
-                child: MiniTransactionButton(
-                  buttonTitle: 'Add Mini Transaction',
-                  operationType: ArthmeticOperation.Add,
-                  addToList: _addToMiniList,
-                  balanceChange:
-                      widget.transactionType == TransactionType.Expense
-                          ? BalanceChange.Decrement
-                          : BalanceChange.Icrement,
-                ))
+            ? MiniTransactionButton(
+                buttonTitle: 'Add Mini Transaction',
+                operationType: ArthmeticOperation.Add,
+                addToList: _addToMiniList,
+                balanceChange: widget.transactionType == TransactionType.Expense
+                    ? BalanceChange.Decrement
+                    : BalanceChange.Icrement,
+              )
             : Table(
                 columnWidths: {
                   2: FlexColumnWidth(0.5),
@@ -431,7 +435,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildBottomButton() {
     return InkWell(
-      onTap: _saveForm,
+      onTap: _isLoading ? null : _saveForm,
       child: Container(
         width: double.infinity,
         height: 55,
@@ -452,7 +456,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text(
-              'Save',
+              _isLoading ? '. . . . .' : 'Save',
               style: AppTheme.formSubmitButtonTextStyle,
             ),
           ],
@@ -461,89 +465,110 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
+  Widget _loadingView() {
+    return Stack(
+      children: [
+        Container(
+          color: Colors.white.withOpacity(0.8),
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        Center(
+          child: CircularProgressIndicator(),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(
-              'Add ${getEnumStringValue(widget.transactionType.toString())}'),
-          backgroundColor: _pageThemeColor(),
-        ),
-        bottomNavigationBar: _buildBottomButton(),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (widget.transactionType != TransactionType.Adjustment)
-                  _buildTags(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 15,
-                        ),
-                        _buildAmountField(),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        _buildDescriptionField(),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        if (widget.transactionType !=
-                            TransactionType.Adjustment)
-                          _buildMiniTable(),
-                        if (_miniTransactionList.isNotEmpty)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+    return Theme(
+      data: Theme.of(context).copyWith(accentColor: _pageThemeColor()),
+      child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+                'Add ${getEnumStringValue(widget.transactionType.toString())}'),
+            backgroundColor: _pageThemeColor(),
+          ),
+          bottomNavigationBar: _buildBottomButton(),
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (widget.transactionType != TransactionType.Adjustment)
+                        _buildTags(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Theme(
-                                data: Theme.of(context)
-                                    .copyWith(accentColor: _pageThemeColor()),
-                                child: MiniTransactionButton(
-                                  buttonTitle: 'Add More',
-                                  operationType: ArthmeticOperation.Add,
-                                  addToList: _addToMiniList,
-                                  balanceChange: widget.transactionType ==
-                                          TransactionType.Expense
-                                      ? BalanceChange.Decrement
-                                      : BalanceChange.Icrement,
-                                ),
-                              ),
                               SizedBox(
-                                width: 5,
+                                height: 15,
                               ),
-                              ElevatedButton(
-                                onPressed: _calculateMiniTransactions() > 0
-                                    ? _onTapAutoCalculate
-                                    : null,
-                                child: Text(
-                                  'Rs. ${_calculateMiniTransactions().toStringAsFixed(0)}',
-                                  textAlign: TextAlign.left,
+                              _buildAmountField(),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              _buildDescriptionField(),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              if (widget.transactionType !=
+                                  TransactionType.Adjustment)
+                                _buildMiniTable(),
+                              if (_miniTransactionList.isNotEmpty)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    MiniTransactionButton(
+                                      buttonTitle: 'Add More',
+                                      operationType: ArthmeticOperation.Add,
+                                      addToList: _addToMiniList,
+                                      balanceChange: widget.transactionType ==
+                                              TransactionType.Expense
+                                          ? BalanceChange.Decrement
+                                          : BalanceChange.Icrement,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    ElevatedButton(
+                                      onPressed:
+                                          _calculateMiniTransactions() > 0
+                                              ? _onTapAutoCalculate
+                                              : null,
+                                      child: Text(
+                                        'Rs. ${_calculateMiniTransactions().toStringAsFixed(0)}',
+                                        textAlign: TextAlign.left,
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        primary:
+                                            _pageThemeColor().withOpacity(0.8),
+                                        shadowColor: Colors.transparent,
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                style: ElevatedButton.styleFrom(
-                                  primary: _pageThemeColor().withOpacity(0.8),
-                                  shadowColor: Colors.transparent,
-                                ),
-                              )
+                              SizedBox(
+                                height: 15,
+                              ),
                             ],
                           ),
-                        SizedBox(
-                          height: 15,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ));
+              ),
+              if (_isLoading) _loadingView(),
+            ],
+          )),
+    );
   }
 }
