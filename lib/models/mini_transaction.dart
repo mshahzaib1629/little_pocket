@@ -18,13 +18,25 @@ class MiniTransaction {
     return '{id: $id, name: $name, amount: $amount, balanceChange: ${balanceChange.toString()}}';
   }
 
-  static Map<String, dynamic> toMap(
-      MiniTransaction miniTransaction, String transactionId) {
+  Map<String, dynamic> toMap(int transactionId) {
     return {
       'transactionId': transactionId,
-      'name': miniTransaction.name,
-      'amount': miniTransaction.amount,
-      'balanceChange': miniTransaction.balanceChange.toString(),
+      'name': name,
+      'amount': amount,
+      'balanceChange': balanceChange.toString(),
     };
+  }
+
+  static MiniTransaction fromMap(Map<String, dynamic> miniObj) {
+    MiniTransaction miniTrans = MiniTransaction(
+      id: miniObj['id'],
+      name: miniObj['name'],
+      amount: double.parse(miniObj['amount']),
+      balanceChange: getEnumValue(
+        type: EnumType.BalanceChange,
+        enumString: miniObj['balanceChange'],
+      ),
+    );
+    return miniTrans;
   }
 }

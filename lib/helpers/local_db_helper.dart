@@ -38,6 +38,11 @@ class LocalDatabase {
     return id;
   }
 
+  static Future<List<Map<String, dynamic>>> getTransactions() async {
+    final db = await LocalDatabase.database();
+    return db.query('transactions');
+  }
+
   static Future<List<Map<String, dynamic>>> getTagsOfType(
       TagType tagType) async {
     final db = await LocalDatabase.database();

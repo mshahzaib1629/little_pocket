@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:little_pocket/helpers/enums.dart';
+import 'package:little_pocket/helpers/local_db_helper.dart';
 import 'package:little_pocket/models/mini_transaction.dart';
 import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/models/transaction.dart';
@@ -91,8 +92,38 @@ class TransactionProvider with ChangeNotifier {
     return _dummyTransactions;
   }
 
-  Future<void> addTransaction() async {}
-  Future<void> fetchTransactions() async {}
+  Future<void> fetchTransactions() async {
+    try {
+      var transactionsFetched = await LocalDatabase.getTransactions();
+      print('fetched Transactions: ');
+      transactionsFetched.forEach((element) {
+        print(element);
+      });
+    } catch (error) {
+      print('error from fetchTransactions: \n$error');
+      throw error;
+    }
+  }
+
+  Future<void> addTransaction(Transaction transaction) async {
+    try {
+      int transactionId =
+          await LocalDatabase.insert('transactions', transaction.toMap());
+      for (int i = 0; i < transaction.miniTransactionList.length; i++) {
+        await LocalDatabase.insert(
+          'mini_transactions',
+          transaction.miniTransactionList[i].toMap(transactionId),
+        );
+      }
+      await fetchTransactions();
+      // _myTransactions.add(transaction);
+      // notifyListeners();
+    } catch (error) {
+      print('error from addTransaction: \n$error');
+      throw error;
+    }
+  }
+
   Future<void> editTransaction() async {}
   Future<void> removeTransaction() async {}
 }

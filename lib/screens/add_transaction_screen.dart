@@ -6,6 +6,7 @@ import 'package:little_pocket/models/mini_transaction.dart';
 import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/models/transaction.dart';
 import 'package:little_pocket/providers/tag_provider.dart';
+import 'package:little_pocket/providers/transaction_provider.dart';
 import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/mini_transaction_button.dart';
 import 'package:little_pocket/widgets/add_tag_button.dart';
@@ -83,6 +84,36 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return color;
   }
 
+  Future<void> _submitForm() async {
+    try {
+      final transaction = Transaction(
+        tag: _selectedTag,
+        transactionType: widget.transactionType,
+        dateTime: DateTime.now(),
+        amount: double.parse(_amountTextController.text),
+        balanceChange: _balanceChange,
+        description: _descriptionTextController.text,
+        miniTransactionList: _miniTransactionList,
+      );
+      final transactionProvider =
+          Provider.of<TransactionProvider>(context, listen: false);
+      setState(() {
+        _isLoading = true;
+      });
+      await transactionProvider.addTransaction(transaction);
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.pop(context);
+    } catch (error) {
+      print('error from _saveForm: \n$error');
+      setState(() {
+        _isLoading = false;
+      });
+      showDefaultErrorMsg(context);
+    }
+  }
+
   Future<void> _saveForm() async {
     if (_selectedTag != null) {
       setState(() {
@@ -95,15 +126,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
     if (_formKey.currentState.validate()) {
-      print('transactionType: ${widget.transactionType.toString()}');
-      print('balanceChange: ${_balanceChange.toString()}');
-      print('selectedTag: ${_selectedTag.toString()}');
-      print('amount: ${_amountTextController.text}');
-      print('description: ${_descriptionTextController.text}');
-      print('mini table: ');
-      _miniTransactionList.forEach((element) {
-        print(element.toString());
-      });
+      await _submitForm();
     }
   }
 
