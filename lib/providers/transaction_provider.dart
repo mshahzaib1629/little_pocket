@@ -7,98 +7,30 @@ import 'package:little_pocket/models/transaction.dart';
 
 class TransactionProvider with ChangeNotifier {
   List<Transaction> _myTransactions = [];
-  List<Transaction> _dummyTransactions = [
-    Transaction(
-      id: 1,
-      tag: Tag(
-        id: 2,
-        name: 'Papa',
-      ),
-      amount: 2500,
-      transactionType: TransactionType.Income,
-      balanceChange: BalanceChange.Icrement,
-      description: 'For buying utilities',
-      dateTime: DateTime.now(),
-    ),
-    Transaction(
-        id: 4,
-        tag: Tag(
-          id: 2,
-          name: 'Bill Payment',
-        ),
-        amount: 1500,
-        transactionType: TransactionType.Expense,
-        balanceChange: BalanceChange.Decrement,
-        description: 'Paid for electricity bill',
-        dateTime: DateTime.now(),
-        miniTransactionList: [
-          MiniTransaction(
-            id: 5,
-            name: 'Electricity',
-            amount: 700,
-            balanceChange: BalanceChange.Decrement,
-          ),
-          MiniTransaction(
-            id: 2,
-            name: 'PTCL',
-            amount: 900,
-            balanceChange: BalanceChange.Decrement,
-          ),
-          MiniTransaction(
-            id: 2,
-            name: 'Discount',
-            amount: 100,
-            balanceChange: BalanceChange.Icrement,
-          ),
-        ]),
-    Transaction(
-      id: 2,
-      tag: Tag(
-        id: 2,
-        name: 'Bought Utilities',
-      ),
-      amount: 300,
-      transactionType: TransactionType.Expense,
-      balanceChange: BalanceChange.Decrement,
-      description: 'Utilites purchased from market',
-      dateTime: DateTime.now(),
-    ),
-    Transaction(
-      id: 2,
-      tag: Tag(
-        id: 1,
-        name: 'Adjustment',
-      ),
-      amount: 150,
-      transactionType: TransactionType.Adjustment,
-      balanceChange: BalanceChange.Icrement,
-      dateTime: DateTime.now(),
-    ),
-    Transaction(
-      id: 1,
-      tag: Tag(
-        id: 1,
-        name: 'Bank',
-      ),
-      amount: 2000,
-      transactionType: TransactionType.Income,
-      balanceChange: BalanceChange.Icrement,
-      dateTime: DateTime.now(),
-    ),
-  ];
 
   List<Transaction> get myTransactions {
-    _dummyTransactions.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    return _dummyTransactions;
+    _myTransactions.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    return _myTransactions.reversed.toList();
   }
 
   Future<void> fetchTransactions() async {
     try {
+      List<Transaction> transactionsParsed = [];
       var transactionsFetched = await LocalDatabase.getTransactions();
-      print('fetched Transactions: ');
-      transactionsFetched.forEach((element) {
-        print(element);
-      });
+      for (int i = 0; i < transactionsFetched.length; i++) {
+        print(transactionsFetched[i]);
+        var transaction = Transaction.fromMap(transactionsFetched[i]);
+        var miniTransactionsFetched =
+            await LocalDatabase.getMiniTransactions(transaction.id);
+        transaction.miniTransactionList = miniTransactionsFetched
+            .map((miniTrans) => MiniTransaction.fromMap(miniTrans))
+            .toList();
+        var tagFetched = await LocalDatabase.getTag(transaction.tag.id);
+        transaction.tag = Tag.fromMap(tagFetched);
+        transactionsParsed.add(transaction);
+      }
+      _myTransactions = transactionsParsed;
+      notifyListeners();
     } catch (error) {
       print('error from fetchTransactions: \n$error');
       throw error;
@@ -107,17 +39,20 @@ class TransactionProvider with ChangeNotifier {
 
   Future<void> addTransaction(Transaction transaction) async {
     try {
+      List<MiniTransaction> newlyMiniTransactionList = [];
       int transactionId =
           await LocalDatabase.insert('transactions', transaction.toMap());
+      transaction.id = transactionId;
       for (int i = 0; i < transaction.miniTransactionList.length; i++) {
-        await LocalDatabase.insert(
+        transaction.miniTransactionList[i].id = await LocalDatabase.insert(
           'mini_transactions',
           transaction.miniTransactionList[i].toMap(transactionId),
         );
+        newlyMiniTransactionList.add(transaction.miniTransactionList[i]);
       }
-      await fetchTransactions();
-      // _myTransactions.add(transaction);
-      // notifyListeners();
+      transaction.miniTransactionList = newlyMiniTransactionList;
+      _myTransactions.add(transaction);
+      notifyListeners();
     } catch (error) {
       print('error from addTransaction: \n$error');
       throw error;
@@ -125,5 +60,15 @@ class TransactionProvider with ChangeNotifier {
   }
 
   Future<void> editTransaction() async {}
-  Future<void> removeTransaction() async {}
+  Future<void> removeTransaction(Transaction transaction) async {
+    try {
+      await LocalDatabase.deleteMiniTransactions(transaction.id);
+      await LocalDatabase.delete('transactions', transaction.id);
+      _myTransactions.remove(transaction);
+      notifyListeners();
+    } catch (error) {
+      print('error from removeTransaction: \n$error');
+      throw error;
+    }
+  }
 }

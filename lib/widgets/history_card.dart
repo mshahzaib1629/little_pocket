@@ -35,6 +35,32 @@ class HistoryCard extends StatelessWidget {
     );
   }
 
+  String _getTimeDifference() {
+    DateTime profileViewDateTime = transaction.dateTime;
+    int diffInSeconds =
+        DateTime.now().difference(profileViewDateTime).inSeconds;
+    if (diffInSeconds < 172800) {
+      if (diffInSeconds > 86400) {
+        double days = diffInSeconds / 86400;
+        bool greaterThanOne = days > 1;
+        return '${days.toStringAsFixed(0)} day${greaterThanOne ? 's' : ''} ago';
+      }
+      if (diffInSeconds > 3600) {
+        double hours = diffInSeconds / 3600;
+        return '${hours.toStringAsFixed(0)} h';
+      }
+      if (diffInSeconds > 60) {
+        double minutes = diffInSeconds / 60;
+        bool greaterThanOne = minutes > 1;
+        return '${minutes.toStringAsFixed(0)} min${greaterThanOne ? 's' : ''} ago';
+      } else {
+        return 'just now';
+      }
+    } else {
+      return DateFormat(AppTheme.dateFormat).format(transaction.dateTime);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -63,8 +89,7 @@ class HistoryCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(DateFormat(AppTheme.dateFormat)
-                            .format(transaction.dateTime)),
+                        Text(_getTimeDifference()),
                         SizedBox(
                           height: 3,
                         ),

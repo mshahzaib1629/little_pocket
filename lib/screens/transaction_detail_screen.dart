@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:little_pocket/helpers/configurations.dart';
 import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/helpers/styling.dart';
 import 'package:little_pocket/models/transaction.dart';
@@ -138,6 +139,18 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     );
   }
 
+  bool _isEditable() {
+    DateTime profileViewDateTime = widget.transaction.dateTime;
+    int diffInSeconds =
+        DateTime.now().difference(profileViewDateTime).inSeconds;
+    if (diffInSeconds < Configs.thresholdEditableSeconds) {
+      return true;
+    } else
+      return false;
+  }
+
+  Future<void> _onEditPressed() {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +159,10 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
           widget.transaction.tag.name,
         ),
         backgroundColor: _pageThemeColor(),
+        actions: [
+          if (_isEditable())
+            IconButton(icon: Icon(Icons.edit), onPressed: _onEditPressed)
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -190,7 +207,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
               SizedBox(
                 height: 15,
               ),
-              if (widget.transaction.miniTransactionList != null)
+              if (widget.transaction.miniTransactionList.isNotEmpty)
                 _buildMiniTable(),
             ],
           ),

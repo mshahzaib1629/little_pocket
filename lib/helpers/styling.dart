@@ -38,6 +38,12 @@ class AppTheme {
     fontSize: 18,
   );
 
+  static TextStyle emptyPageTextStyle = TextStyle(
+    color: Colors.grey,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+  );
+
   static TextStyle addTagBtnTextStyle = TextStyle(
     color: Colors.black,
   );

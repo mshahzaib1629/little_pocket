@@ -31,7 +31,7 @@ class MiniTransaction {
     MiniTransaction miniTrans = MiniTransaction(
       id: miniObj['id'],
       name: miniObj['name'],
-      amount: double.parse(miniObj['amount']),
+      amount: miniObj['amount'],
       balanceChange: getEnumValue(
         type: EnumType.BalanceChange,
         enumString: miniObj['balanceChange'],

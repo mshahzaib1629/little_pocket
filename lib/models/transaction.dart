@@ -45,7 +45,7 @@ class Transaction {
       ),
       dateTime: DateFormat('yyyy-MM-ddThh:mm:ss', 'en_US')
           .parse(transObj['dateTime']),
-      amount: double.parse(transObj['amount']),
+      amount: transObj['amount'],
       transactionType: getEnumValue(
         type: EnumType.TransactionType,
         enumString: transObj['transactionType'],

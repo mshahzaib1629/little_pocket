@@ -43,17 +43,45 @@ class LocalDatabase {
     return db.query('transactions');
   }
 
+  static Future<List<Map<String, dynamic>>> getMiniTransactions(
+      int transId) async {
+    final db = await LocalDatabase.database();
+    return db.query(
+      'mini_transactions',
+      where: 'transactionId = ?',
+      whereArgs: [transId],
+    );
+  }
+
   static Future<List<Map<String, dynamic>>> getTagsOfType(
       TagType tagType) async {
     final db = await LocalDatabase.database();
-    return db.query('tags',
-        where: 'tagType = ? AND isActive = ?',
-        whereArgs: [tagType.toString(), 1]);
+    return db.query(
+      'tags',
+      where: 'tagType = ? AND isActive = ?',
+      whereArgs: [tagType.toString(), 1],
+    );
+  }
+
+  static Future<Map<String, dynamic>> getTag(int id) async {
+    final db = await LocalDatabase.database();
+    var tagsFetched = await db.query(
+      'tags',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return tagsFetched[0];
   }
 
   static Future<void> delete(String table, int id) async {
     final db = await LocalDatabase.database();
     await db.delete(table, where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<void> deleteMiniTransactions(int transactionId) async {
+    final db = await LocalDatabase.database();
+    await db.delete('mini_transactions',
+        where: 'transactionId = ?', whereArgs: [transactionId]);
   }
 
   static Future<void> update(

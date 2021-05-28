@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hawk_fab_menu/hawk_fab_menu.dart';
+import 'package:little_pocket/helpers/configurations.dart';
 import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/helpers/styling.dart';
 import 'package:little_pocket/models/transaction.dart';
 import 'package:little_pocket/providers/transaction_provider.dart';
 import 'package:little_pocket/screens/add_transaction_screen.dart';
 import 'package:little_pocket/screens/app_drawer.dart';
+import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/history_card.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +19,98 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  bool _isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    _fetchTransactions();
+  }
+
+  Future<void> _fetchTransactions() async {
+    try {
+      final tagProvider =
+          Provider.of<TransactionProvider>(context, listen: false);
+      setState(() {
+        _isLoading = true;
+      });
+      await tagProvider.fetchTransactions();
+    } catch (error) {
+      print('error from _fetchTransactions: \n$error');
+      showDefaultErrorMsg(context);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  bool _isDismissable(Transaction transaction) {
+    DateTime profileViewDateTime = transaction.dateTime;
+    int diffInSeconds =
+        DateTime.now().difference(profileViewDateTime).inSeconds;
+    if (diffInSeconds < Configs.thresholdEditableSeconds) {
+      return true;
+    } else
+      return false;
+  }
+
+  Future<bool> _confirmDismiss(
+      DismissDirection direction, Transaction transaction) async {
+    return showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Sure to delete ${transaction.tag.name}?'),
+              content: Text('This action can not be undone!'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text(
+                    'No',
+                    style: TextStyle(
+                      color: _dismissibleColor(transaction),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(
+                      color: _dismissibleColor(transaction),
+                    ),
+                  ),
+                ),
+              ],
+            ));
+  }
+
+  void _onDismissed(DismissDirection direction, Transaction transaction) {
+    try {
+      print('_onDismissed is called');
+      final transactionProvider =
+          Provider.of<TransactionProvider>(context, listen: false);
+      transactionProvider.removeTransaction(transaction);
+    } catch (error) {
+      print('error from _onDismissed: \n$error');
+      showDefaultErrorMsg(context);
+    }
+  }
+
+  Color _dismissibleColor(Transaction transaction) {
+    Color color = AppTheme.adjustmentColor;
+    if (transaction.transactionType == TransactionType.Income)
+      color = AppTheme.incomeColor;
+    else if (transaction.transactionType == TransactionType.Expense)
+      color = AppTheme.expenseColor;
+    else if (transaction.transactionType == TransactionType.Adjustment)
+      color = AppTheme.adjustmentColor;
+    return color;
+  }
+
   List<HawkFabMenuItem> _floatButtonMenuList(context) => [
         HawkFabMenuItem(
           label: 'Income',
@@ -71,23 +165,73 @@ class _HistoryScreenState extends State<HistoryScreen> {
       drawer: AppDrawer(),
       body: HawkFabMenu(
         items: _floatButtonMenuList(context),
-        body: Consumer<TransactionProvider>(
-          builder: (context, transactionSnap, _) {
-            List<Transaction> _transactions = transactionSnap.myTransactions;
-            return ListView.builder(
-                itemCount: _transactions.length,
-                itemBuilder: (context, index) => Column(
-                      children: [
-                        HistoryCard(_transactions[index]),
-                        // if (index != _transactions.length - 1)
-                        Divider(
-                          height: 0,
-                          color: Colors.black26,
-                        ),
-                      ],
-                    ));
-          },
-        ),
+        body: _isLoading
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Consumer<TransactionProvider>(
+                builder: (context, transactionConsumer, _) {
+                  List<Transaction> _transactions =
+                      transactionConsumer.myTransactions;
+                  return RefreshIndicator(
+                    onRefresh: _fetchTransactions,
+                    child: _transactions.length == 0
+                        ? ListView(
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height / 2.5,
+                              ),
+                              Center(
+                                child: Text(
+                                  'Seems no record exists!',
+                                  style: AppTheme.emptyPageTextStyle,
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
+                            itemCount: _transactions.length,
+                            itemBuilder: (context, index) => _isDismissable(
+                                    _transactions[index])
+                                ? Dismissible(
+                                    key:
+                                        Key(_transactions[index].id.toString()),
+                                    confirmDismiss: (direction) =>
+                                        _confirmDismiss(
+                                            direction, _transactions[index]),
+                                    background: Container(
+                                      color: _dismissibleColor(
+                                        _transactions[index],
+                                      ),
+                                    ),
+                                    onDismissed: (direction) => _onDismissed(
+                                        direction, _transactions[index]),
+                                    child: Column(
+                                      children: [
+                                        HistoryCard(_transactions[index]),
+                                        // if (index != _transactions.length - 1)
+                                        Divider(
+                                          height: 0,
+                                          color: Colors.black26,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Column(
+                                    children: [
+                                      HistoryCard(_transactions[index]),
+                                      // if (index != _transactions.length - 1)
+                                      Divider(
+                                        height: 0,
+                                        color: Colors.black26,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                  );
+                },
+              ),
       ),
     );
   }
