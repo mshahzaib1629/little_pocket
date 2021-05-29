@@ -50,6 +50,9 @@ class TransactionProvider with ChangeNotifier {
         );
         newlyMiniTransactionList.add(transaction.miniTransactionList[i]);
       }
+      Tag selectedTag = transaction.tag;
+      selectedTag.lastTimeUsed = DateTime.now();
+      await LocalDatabase.update('tags', selectedTag.id, selectedTag.toMap());
       transaction.miniTransactionList = newlyMiniTransactionList;
       _myTransactions.add(transaction);
       notifyListeners();

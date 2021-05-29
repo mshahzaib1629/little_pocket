@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:little_pocket/models/transaction.dart';
 
 class AppTheme {
   static Color primaryColor = Colors.blue;
@@ -98,4 +100,29 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
         ),
       );
+
+  static String getTimeDifferenceString(Transaction transaction) {
+    DateTime profileViewDateTime = transaction.dateTime;
+    int diffInSeconds =
+        DateTime.now().difference(profileViewDateTime).inSeconds;
+    if (diffInSeconds < 172800) {
+      if (diffInSeconds > 86400) {
+        double days = diffInSeconds / 86400;
+        bool greaterThanOne = days > 1;
+        return '${days.toStringAsFixed(0)} day${greaterThanOne ? 's' : ''} ago';
+      }
+      if (diffInSeconds > 3600) {
+        double hours = diffInSeconds / 3600;
+        return '${hours.toStringAsFixed(0)} hour${hours > 2 ? 's' : ''} ago';
+      }
+      if (diffInSeconds > 60) {
+        double minutes = diffInSeconds / 60;
+        return '${minutes.toStringAsFixed(0)} min${minutes > 2 ? 's' : ''} ago';
+      } else {
+        return 'just now';
+      }
+    } else {
+      return DateFormat(dateFormat).format(transaction.dateTime);
+    }
+  }
 }

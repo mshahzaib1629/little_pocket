@@ -44,23 +44,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  bool _isDismissable(Transaction transaction) {
-    DateTime profileViewDateTime = transaction.dateTime;
-    int diffInSeconds =
-        DateTime.now().difference(profileViewDateTime).inSeconds;
-    if (diffInSeconds < Configs.thresholdEditableSeconds) {
-      return true;
-    } else
-      return false;
-  }
-
   Future<bool> _confirmDismiss(
       DismissDirection direction, Transaction transaction) async {
     return showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-              title: Text('Sure to delete ${transaction.tag.name}?'),
-              content: Text('This action can not be undone!'),
+              content: Text(
+                  'Sure to delete ${transaction.tag.name}?\nThis action can not be undone!'),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -192,7 +182,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           )
                         : ListView.builder(
                             itemCount: _transactions.length,
-                            itemBuilder: (context, index) => _isDismissable(
+                            itemBuilder: (context, index) => Configs.isEditable(
                                     _transactions[index])
                                 ? Dismissible(
                                     key:

@@ -22,6 +22,7 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  final _tagSearchController = TextEditingController();
   final _amountTextController = TextEditingController();
   final _descriptionTextController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -42,7 +43,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _balanceChange = BalanceChange.Icrement;
     else
       _balanceChange = BalanceChange.Decrement;
-
     _fetchTags();
   }
 
@@ -168,23 +168,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _tagSet(tags, highlightedColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12.0,
-        vertical: 5,
-      ),
-      child: Wrap(
-          direction: Axis.horizontal,
-          spacing: 5,
-          runSpacing: 5,
-          alignment: WrapAlignment.start,
-          children: _getTags(
-            tags,
-            highlightedColor,
-          )),
-    );
+    return Wrap(
+        direction: Axis.horizontal,
+        spacing: 5,
+        runSpacing: 5,
+        alignment: WrapAlignment.start,
+        children: _getTags(
+          tags,
+          highlightedColor,
+        ));
   }
 
+  List<Tag> filteredTags = [];
   Widget _buildTags() {
     return Theme(
       data: Theme.of(context).copyWith(
@@ -205,14 +200,66 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 padding: const EdgeInsets.only(
                   bottom: 16.0,
                 ),
-                child: Consumer<TagProvider>(
-                  builder: (context, tagConsumer, _) => _tagSet(
-                    widget.transactionType == TransactionType.Income
-                        ? tagConsumer.incomeTags
-                        : tagConsumer.expenseTags,
-                    Theme.of(context).accentColor,
-                  ),
-                ),
+                child:
+                    Consumer<TagProvider>(builder: (context, tagConsumer, _) {
+                  List<Tag> allTags =
+                      widget.transactionType == TransactionType.Income
+                          ? tagConsumer.incomeTags
+                          : tagConsumer.expenseTags;
+                  allTags
+                      .sort((a, b) => b.lastTimeUsed.compareTo(a.lastTimeUsed));
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 5,
+                        ),
+                        TextField(
+                          controller: _tagSearchController,
+                          textCapitalization: TextCapitalization.words,
+                          onChanged: (value) {
+                            setState(() {
+                              filteredTags = [];
+                            });
+                            allTags.forEach((element) {
+                              if (element.name.contains(value))
+                                setState(() {
+                                  filteredTags.add(element);
+                                });
+                            });
+                          },
+                          decoration:
+                              AppTheme.inputDecoration(_pageThemeColor())
+                                  .copyWith(
+                            labelText: 'Search here',
+                            labelStyle: TextStyle(
+                              fontSize: 16,
+                              color: Theme.of(context).accentColor,
+                            ),
+                            filled: true,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 0),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        _tagSet(
+                          filteredTags.isEmpty &&
+                                  _tagSearchController.text.isEmpty
+                              ? allTags.take(15).toList()
+                              : filteredTags,
+                          _pageThemeColor(),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -349,6 +396,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   void _addToMiniList(MiniTransaction miniTransaction) {
+    FocusManager.instance.primaryFocus.unfocus();
     setState(() {
       _miniTransactionList.add(miniTransaction);
     });

@@ -20,8 +20,9 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _descriptionTextController.text =
-        widget.transaction.description ?? 'No description.';
+    _descriptionTextController.text = widget.transaction.description.length == 0
+        ? 'No description.'
+        : widget.transaction.description;
   }
 
   Color _pageThemeColor() {

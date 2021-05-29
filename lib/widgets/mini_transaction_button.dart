@@ -6,8 +6,8 @@ import '../helpers/validation.dart';
 
 class MiniTransactionButton extends StatelessWidget {
   final _itemNameController = TextEditingController();
-
   final _itemAmountController = TextEditingController();
+  final _amountFocusNode = FocusNode();
 
   final Function(MiniTransaction miniTransaction) addToList;
   final Function({MiniTransaction miniTrans, ArthmeticOperation operation})
@@ -81,6 +81,8 @@ class MiniTransactionButton extends StatelessWidget {
                           if (value.isEmpty) return 'Name should not be empty!';
                           return null;
                         },
+                        onFieldSubmitted: (_) => FocusScope.of(context)
+                            .requestFocus(_amountFocusNode),
                         decoration: AppTheme.inputDecoration(
                                 Theme.of(context).accentColor)
                             .copyWith(
@@ -99,6 +101,7 @@ class MiniTransactionButton extends StatelessWidget {
                       ),
                       TextFormField(
                         controller: _itemAmountController,
+                        focusNode: _amountFocusNode,
                         cursorColor: Theme.of(context).accentColor,
                         keyboardType: TextInputType.number,
                         validator: (value) {
