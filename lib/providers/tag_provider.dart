@@ -33,7 +33,7 @@ class TagProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addNewTag(Tag tag) async {
+  Future<Tag> addNewTag(Tag tag) async {
     try {
       int id = await LocalDatabase.insert('tags', tag.toMap());
       tag.id = id;
@@ -42,6 +42,7 @@ class TagProvider with ChangeNotifier {
       else
         _expenseTags.add(tag);
       notifyListeners();
+      return tag;
     } catch (error) {
       print('error from addNewTag: \n$error');
       throw error;

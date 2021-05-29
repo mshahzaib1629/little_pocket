@@ -83,7 +83,7 @@ class HistoryCard extends StatelessWidget {
                               children: [
                                 TextSpan(
                                     text:
-                                        ' Rs. ${transaction.amount.toString()}')
+                                        ' Rs. ${transaction.amount.toStringAsFixed(0)}')
                               ]),
                         ),
                       ],

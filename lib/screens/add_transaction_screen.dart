@@ -15,8 +15,13 @@ import 'package:provider/provider.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionType transactionType;
-
-  AddTransactionScreen(this.transactionType);
+  final ArthmeticOperation accessedFor;
+  final Transaction transactionToEdit;
+  AddTransactionScreen({
+    @required this.transactionType,
+    @required this.accessedFor,
+    this.transactionToEdit,
+  });
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
 }
@@ -26,24 +31,35 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _amountTextController = TextEditingController();
   final _descriptionTextController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  List<Tag> filteredTags = [];
   Tag _selectedTag;
   bool _showTagSelectedError = false;
   BalanceChange _balanceChange;
 
   List<MiniTransaction> _miniTransactionList = [];
+  // in case of accessedFor == ArithmaticOperation.Edit
+  List<MiniTransaction> _deletedMiniTransactions = [];
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // @TODO
-    // if this screen is opened for adding new data
-    if (widget.transactionType == TransactionType.Income ||
-        widget.transactionType == TransactionType.Adjustment)
-      _balanceChange = BalanceChange.Icrement;
-    else
-      _balanceChange = BalanceChange.Decrement;
     _fetchTags();
+    if (widget.accessedFor == ArthmeticOperation.Add) {
+      if (widget.transactionType == TransactionType.Income ||
+          widget.transactionType == TransactionType.Adjustment)
+        _balanceChange = BalanceChange.Icrement;
+      else
+        _balanceChange = BalanceChange.Decrement;
+    } else {
+      _balanceChange = widget.transactionToEdit.balanceChange;
+      _amountTextController.text =
+          widget.transactionToEdit.amount.toStringAsFixed(0);
+      _descriptionTextController.text = widget.transactionToEdit.description;
+      _miniTransactionList = widget.transactionToEdit.miniTransactionList;
+      _selectedTag = widget.transactionToEdit.tag;
+    }
   }
 
   Future<void> _fetchTags() async {
@@ -84,7 +100,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return color;
   }
 
-  Future<void> _submitForm() async {
+  Future<void> _addTransaction() async {
     try {
       final transaction = Transaction(
         tag: _selectedTag,
@@ -106,7 +122,43 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       });
       Navigator.pop(context);
     } catch (error) {
-      print('error from _saveForm: \n$error');
+      print('error from _addTransaction: \n$error');
+      setState(() {
+        _isLoading = false;
+      });
+      showDefaultErrorMsg(context);
+    }
+  }
+
+  Future<void> _updateTransaction() async {
+    try {
+      final transaction = Transaction(
+        id: widget.transactionToEdit.id,
+        tag: _selectedTag,
+        transactionType: widget.transactionType,
+        dateTime: widget.accessedFor == ArthmeticOperation.Add
+            ? DateTime.now()
+            : widget.transactionToEdit.dateTime,
+        amount: double.parse(_amountTextController.text),
+        balanceChange: _balanceChange,
+        description: _descriptionTextController.text,
+        miniTransactionList: _miniTransactionList,
+      );
+      final transactionProvider =
+          Provider.of<TransactionProvider>(context, listen: false);
+      setState(() {
+        _isLoading = true;
+      });
+      await transactionProvider.updateTransaction(
+        transaction,
+        _deletedMiniTransactions,
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.pop(context, transaction);
+    } catch (error) {
+      print('error from _updateTransaction: \n$error');
       setState(() {
         _isLoading = false;
       });
@@ -126,14 +178,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return;
     }
     if (_formKey.currentState.validate()) {
-      await _submitForm();
+      if (widget.accessedFor == ArthmeticOperation.Add)
+        await _addTransaction();
+      else if (widget.accessedFor == ArthmeticOperation.Edit)
+        await _updateTransaction();
     }
   }
 
   Future<void> addToTagList(Tag tag) async {
     try {
       final tagProvider = Provider.of<TagProvider>(context, listen: false);
-      tagProvider.addNewTag(tag);
+      Tag newTag = await tagProvider.addNewTag(tag);
+      if (filteredTags.isNotEmpty)
+        setState(() {
+          filteredTags.add(newTag);
+        });
     } catch (error) {
       print('error from addToTagList: \n$error');
       showDefaultErrorMsg(context);
@@ -142,7 +201,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   List<Widget> _getTags(List<Tag> tags, Color highlightedColor) {
     List<Widget> tagsToDisplay = [];
-
     for (int i = 0; i < tags.length; i++) {
       tagsToDisplay.add(InkWell(
         onTap: () {
@@ -179,7 +237,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ));
   }
 
-  List<Tag> filteredTags = [];
   Widget _buildTags() {
     return Theme(
       data: Theme.of(context).copyWith(
@@ -208,56 +265,63 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           : tagConsumer.expenseTags;
                   allTags
                       .sort((a, b) => b.lastTimeUsed.compareTo(a.lastTimeUsed));
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12.0,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 5,
-                        ),
-                        TextField(
-                          controller: _tagSearchController,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (value) {
-                            setState(() {
-                              filteredTags = [];
-                            });
-                            allTags.forEach((element) {
-                              if (element.name.contains(value))
-                                setState(() {
-                                  filteredTags.add(element);
-                                });
-                            });
-                          },
-                          decoration:
-                              AppTheme.inputDecoration(_pageThemeColor())
-                                  .copyWith(
-                            labelText: 'Search here',
-                            labelStyle: TextStyle(
-                              fontSize: 16,
-                              color: Theme.of(context).accentColor,
-                            ),
-                            filled: true,
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 0),
+                    child: widget.accessedFor == ArthmeticOperation.Edit
+                        ? TagCard(
+                            // index: i,
+                            tag: _selectedTag,
+                            editable: false,
+                            isHighlighted: true,
+                            highlightedColor: _pageThemeColor(),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 5,
+                              ),
+                              TextField(
+                                controller: _tagSearchController,
+                                textCapitalization: TextCapitalization.words,
+                                onChanged: (value) {
+                                  setState(() {
+                                    filteredTags = [];
+                                  });
+                                  allTags.forEach((element) {
+                                    if (element.name.contains(value))
+                                      setState(() {
+                                        filteredTags.add(element);
+                                      });
+                                  });
+                                },
+                                decoration:
+                                    AppTheme.inputDecoration(_pageThemeColor())
+                                        .copyWith(
+                                  labelText: 'Search here',
+                                  labelStyle: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).accentColor,
+                                  ),
+                                  filled: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 0),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              _tagSet(
+                                filteredTags.isEmpty &&
+                                        _tagSearchController.text.isEmpty
+                                    ? allTags.take(15).toList()
+                                    : filteredTags,
+                                _pageThemeColor(),
+                              ),
+                            ],
                           ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        _tagSet(
-                          filteredTags.isEmpty &&
-                                  _tagSearchController.text.isEmpty
-                              ? allTags.take(15).toList()
-                              : filteredTags,
-                          _pageThemeColor(),
-                        ),
-                      ],
-                    ),
                   );
                 }),
               ),
@@ -387,12 +451,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }) {
     if (operation == ArthmeticOperation.Edit)
       setState(() {
-        _miniTransactionList[index] = miniTransaction;
+        if (_miniTransactionList[index].id != null) {
+          int miniTransId = _miniTransactionList[index].id;
+          _miniTransactionList[index] = miniTransaction;
+          _miniTransactionList[index].id = miniTransId;
+        } else
+          _miniTransactionList[index] = miniTransaction;
       });
-    else if (operation == ArthmeticOperation.Delete)
+    else if (operation == ArthmeticOperation.Delete) {
+      var deletedMiniTrans = _miniTransactionList.elementAt(index);
       setState(() {
         _miniTransactionList.removeAt(index);
+        if (widget.accessedFor == ArthmeticOperation.Edit &&
+            deletedMiniTrans.id != null)
+          _deletedMiniTransactions.add(deletedMiniTrans);
       });
+    }
   }
 
   void _addToMiniList(MiniTransaction miniTransaction) {
@@ -558,7 +632,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: Scaffold(
           appBar: AppBar(
             title: Text(
-                'Add ${getEnumStringValue(widget.transactionType.toString())}'),
+                '${getEnumStringValue(widget.accessedFor.toString())} ${getEnumStringValue(widget.transactionType.toString())}'),
             backgroundColor: _pageThemeColor(),
           ),
           bottomNavigationBar: _buildBottomButton(),

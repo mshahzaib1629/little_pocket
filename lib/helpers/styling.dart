@@ -108,16 +108,15 @@ class AppTheme {
     if (diffInSeconds < 172800) {
       if (diffInSeconds > 86400) {
         double days = diffInSeconds / 86400;
-        bool greaterThanOne = days > 1;
-        return '${days.toStringAsFixed(0)} day${greaterThanOne ? 's' : ''} ago';
+        return '${days.toStringAsFixed(0)} day${days >= 2 ? 's' : ''} ago';
       }
       if (diffInSeconds > 3600) {
         double hours = diffInSeconds / 3600;
-        return '${hours.toStringAsFixed(0)} hour${hours > 2 ? 's' : ''} ago';
+        return '${hours.toStringAsFixed(0)} hour${hours >= 2 ? 's' : ''} ago';
       }
       if (diffInSeconds > 60) {
         double minutes = diffInSeconds / 60;
-        return '${minutes.toStringAsFixed(0)} min${minutes > 2 ? 's' : ''} ago';
+        return '${minutes.toStringAsFixed(0)} min${minutes >= 2 ? 's' : ''} ago';
       } else {
         return 'just now';
       }

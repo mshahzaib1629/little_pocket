@@ -18,7 +18,7 @@ class TransactionProvider with ChangeNotifier {
       List<Transaction> transactionsParsed = [];
       var transactionsFetched = await LocalDatabase.getTransactions();
       for (int i = 0; i < transactionsFetched.length; i++) {
-        print(transactionsFetched[i]);
+        // print(transactionsFetched[i]);
         var transaction = Transaction.fromMap(transactionsFetched[i]);
         var miniTransactionsFetched =
             await LocalDatabase.getMiniTransactions(transaction.id);
@@ -62,7 +62,40 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
-  Future<void> editTransaction() async {}
+  Future<void> updateTransaction(Transaction transaction,
+      List<MiniTransaction> deletedMiniTransactions) async {
+    try {
+      // adding and updating mini_transactions
+      for (int i = 0; i < transaction.miniTransactionList.length; i++) {
+        var miniTrans = transaction.miniTransactionList[i];
+        if (miniTrans.id == null)
+          await LocalDatabase.insert(
+              'mini_transactions', miniTrans.toMap(transaction.id));
+        else
+          await LocalDatabase.update('mini_transactions', miniTrans.id,
+              miniTrans.toMap(transaction.id));
+      }
+      // deleting mini_transactions
+      for (int d = 0; d < deletedMiniTransactions.length; d++) {
+        var miniTransToDelete = deletedMiniTransactions[d];
+        await LocalDatabase.delete(
+          'mini_transactions',
+          miniTransToDelete.id,
+        );
+      }
+      // updating transaction detail
+      await LocalDatabase.update(
+          'transactions', transaction.id, transaction.toMap());
+      int targetedIndex =
+          _myTransactions.indexWhere((trans) => trans.id == transaction.id);
+      _myTransactions[targetedIndex] = transaction;
+      notifyListeners();
+    } catch (error) {
+      print('error from updateTransaction: \n$error');
+      throw error;
+    }
+  }
+
   Future<void> removeTransaction(Transaction transaction) async {
     try {
       await LocalDatabase.deleteMiniTransactions(transaction.id);

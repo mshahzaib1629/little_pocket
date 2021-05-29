@@ -124,11 +124,15 @@ class _TagScreenState extends State<TagScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Consumer<TagProvider>(
-                      builder: (context, tagConsumer, _) => _tagSet(
-                        tagConsumer.incomeTags,
-                        TagType.Income,
-                        Theme.of(context).accentColor,
-                      ),
+                      builder: (context, tagConsumer, _) {
+                        tagConsumer.incomeTags
+                            .sort((a, b) => a.name.compareTo(b.name));
+                        return _tagSet(
+                          tagConsumer.incomeTags,
+                          TagType.Income,
+                          Theme.of(context).accentColor,
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -151,11 +155,15 @@ class _TagScreenState extends State<TagScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Consumer<TagProvider>(
-                      builder: (context, tagConsumer, _) => _tagSet(
-                        tagConsumer.expenseTags,
-                        TagType.Expense,
-                        Theme.of(context).accentColor,
-                      ),
+                      builder: (context, tagConsumer, _) {
+                        tagConsumer.expenseTags
+                            .sort((a, b) => a.name.compareTo(b.name));
+                        return _tagSet(
+                          tagConsumer.expenseTags,
+                          TagType.Expense,
+                          Theme.of(context).accentColor,
+                        );
+                      },
                     ),
                   ),
                 ],

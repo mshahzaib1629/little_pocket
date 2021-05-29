@@ -4,6 +4,7 @@ import 'package:little_pocket/helpers/configurations.dart';
 import 'package:little_pocket/helpers/enums.dart';
 import 'package:little_pocket/helpers/styling.dart';
 import 'package:little_pocket/models/transaction.dart';
+import 'package:little_pocket/screens/add_transaction_screen.dart';
 
 class TransactionDetailScreen extends StatefulWidget {
   Transaction transaction;
@@ -20,9 +21,16 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _descriptionTextController.text = widget.transaction.description.length == 0
-        ? 'No description.'
-        : widget.transaction.description;
+    _setDescription();
+  }
+
+  void _setDescription() {
+    setState(() {
+      _descriptionTextController.text =
+          widget.transaction.description.length == 0
+              ? 'No description.'
+              : widget.transaction.description;
+    });
   }
 
   Color _pageThemeColor() {
@@ -45,7 +53,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     return widget.transaction.miniTransactionList
         .map((miniTransaction) => TableRow(children: [
               tableItem(Text('${miniTransaction.name}')),
-              tableItem(Text('Rs. ${miniTransaction.amount.toString()}')),
+              tableItem(
+                  Text('Rs. ${miniTransaction.amount.toStringAsFixed(0)}')),
               tableItem(Text(
                 miniTransaction.balanceChange == BalanceChange.Icrement
                     ? '+'
@@ -140,17 +149,22 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
     );
   }
 
-  bool _isEditable() {
-    DateTime profileViewDateTime = widget.transaction.dateTime;
-    int diffInSeconds =
-        DateTime.now().difference(profileViewDateTime).inSeconds;
-    if (diffInSeconds < Configs.thresholdEditableSeconds) {
-      return true;
-    } else
-      return false;
+  Future<void> _onEditPressed() async {
+    Transaction editedTransaction = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => AddTransactionScreen(
+                  transactionType: widget.transaction.transactionType,
+                  accessedFor: ArthmeticOperation.Edit,
+                  transactionToEdit: widget.transaction,
+                )));
+    if (editedTransaction != null) {
+      setState(() {
+        widget.transaction = editedTransaction;
+      });
+      _setDescription();
+    }
   }
-
-  Future<void> _onEditPressed() {}
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +175,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         ),
         backgroundColor: _pageThemeColor(),
         actions: [
-          if (_isEditable())
+          if (Configs.isEditable(widget.transaction) &&
+              widget.transaction.transactionType != TransactionType.Adjustment)
             IconButton(icon: Icon(Icons.edit), onPressed: _onEditPressed)
         ],
       ),
@@ -198,7 +213,8 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
                     ),
                     children: [
                       TextSpan(
-                          text: ' Rs. ${widget.transaction.amount.toString()}')
+                          text:
+                              ' Rs. ${widget.transaction.amount.toStringAsFixed(0)}')
                     ]),
               ),
               SizedBox(

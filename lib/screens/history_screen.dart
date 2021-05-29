@@ -108,7 +108,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => AddTransactionScreen(
-                TransactionType.Income,
+                transactionType: TransactionType.Income,
+                accessedFor: ArthmeticOperation.Add,
               ),
             ),
           ),
@@ -122,7 +123,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => AddTransactionScreen(
-                TransactionType.Expense,
+                transactionType: TransactionType.Expense,
+                accessedFor: ArthmeticOperation.Add,
               ),
             ),
           ),
@@ -136,7 +138,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => AddTransactionScreen(
-                TransactionType.Adjustment,
+                transactionType: TransactionType.Adjustment,
+                accessedFor: ArthmeticOperation.Add,
               ),
             ),
           ),
