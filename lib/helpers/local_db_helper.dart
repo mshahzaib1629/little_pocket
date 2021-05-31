@@ -63,6 +63,11 @@ class LocalDatabase {
     );
   }
 
+  static Future<List<Map<String, dynamic>>> getAllTags() async {
+    final db = await LocalDatabase.database();
+    return db.query('tags');
+  }
+
   static Future<Map<String, dynamic>> getTag(int id) async {
     final db = await LocalDatabase.database();
     var tagsFetched = await db.query(
