@@ -314,8 +314,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 height: 10,
                               ),
                               _tagSet(
-                                filteredTags.isEmpty &&
-                                        _tagSearchController.text.isEmpty
+                                _tagSearchController.text.isEmpty
                                     ? allTags.take(15).toList()
                                     : filteredTags,
                                 _pageThemeColor(),

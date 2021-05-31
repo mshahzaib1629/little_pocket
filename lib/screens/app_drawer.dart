@@ -22,16 +22,6 @@ class _AppDrawerState extends State<AppDrawer> {
             backgroundColor: Theme.of(context).accentColor,
           ),
           ListTile(
-            leading: Icon(Icons.access_time),
-            title:
-                Text('My Record', style: Theme.of(context).textTheme.subhead),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => HistoryScreen()));
-            },
-          ),
-          Divider(),
-          ListTile(
             leading: Icon(Icons.bookmark),
             title: Text('My Tags', style: Theme.of(context).textTheme.subhead),
             onTap: () {

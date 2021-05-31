@@ -1,19 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:little_pocket/helpers/json_handler.dart';
 import 'package:little_pocket/helpers/manual_exception.dart';
+import 'package:little_pocket/providers/transaction_provider.dart';
 import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/default_snack_bar.dart';
+import 'package:provider/provider.dart';
 
 class ImportExportScreen extends StatelessWidget {
   const ImportExportScreen({Key key}) : super(key: key);
 
   Future<void> _onImportPressed(BuildContext context) async {
     try {
+      bool shouldImport = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: Text('Sure to Import?'),
+                content: Text(
+                  'On importing external data, current data will be lost.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text('Yes, I\'m sure'),
+                  ),
+                ],
+              ));
+      if (!shouldImport) return;
       String filePath = await JsonHelper.import();
       if (filePath != null) {
         showDefaultSnackBar(context,
             text: 'Data imported from \n$filePath', color: Colors.black);
       }
+      final transactionProvider =
+          Provider.of<TransactionProvider>(context, listen: false);
+      await transactionProvider.fetchTransactions();
     } on ManualException catch (error) {
       if (error.toString() == 'invalid_file_format') {
         showDefaultSnackBar(context,

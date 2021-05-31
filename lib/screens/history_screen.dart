@@ -36,7 +36,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       await tagProvider.fetchTransactions();
     } catch (error) {
       print('error from _fetchTransactions: \n$error');
-      showDefaultErrorMsg(context);
+      showDefaultErrorMsg(context, content: error.toString());
     } finally {
       setState(() {
         _isLoading = false;

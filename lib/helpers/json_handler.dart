@@ -80,11 +80,25 @@ class JsonHelper {
           String fileExtension = result.names[0].split('.').last;
           if (fileExtension != 'json')
             throw ManualException(message: 'invalid_file_format');
+
           File file = File(result.files.single.path);
           var stringContent = await file.readAsString();
+
           Map<String, dynamic> jsonData = json.decode(stringContent);
-          print('data read from the file: ');
-          print(jsonData);
+          await LocalDatabase.cleanDatabase();
+
+          var tagsData = jsonData['tags'];
+          for (int t = 0; t < tagsData.length; t++) {
+            await LocalDatabase.insert('tags', tagsData[t]);
+          }
+          var transactionsData = jsonData['transactions'];
+          for (int i = 0; i < transactionsData.length; i++) {
+            await LocalDatabase.insert('transactions', transactionsData[i]);
+          }
+          var miniTransData = jsonData['mini_transactions'];
+          for (int j = 0; j < miniTransData.length; j++) {
+            await LocalDatabase.insert('mini_transactions', miniTransData[j]);
+          }
           return result.files[0].path.split("/").last;
         } else {
           print('user cancelled the pick request');
@@ -93,19 +107,34 @@ class JsonHelper {
       } else
         throw ManualException(message: 'permission_denied');
     } catch (error) {
-      print('error from import: $error');
+      print('error from import: \n$error');
       throw error;
     }
   }
 
   static Future<String> export() async {
     try {
-      Map<String, dynamic> data = {'tags': null, 'transactions': null};
+      Map<String, dynamic> data = {
+        'tags': null,
+        'transactions': null,
+        'mini_transactions': [],
+      };
       var tagsData = await LocalDatabase.getAllTags();
+      var transactionsData = await LocalDatabase.getTransactions();
+
+      for (int i = 0; i < transactionsData.length; i++) {
+        var miniTransactions =
+            await LocalDatabase.getMiniTransactions(transactionsData[i]['id']);
+        data['mini_transactions'].addAll(miniTransactions);
+      }
+
       data['tags'] = tagsData;
+      data['transactions'] = transactionsData;
+
       var jsonData = json.encode(data);
       String filePath = await _saveFile(jsonData);
       print('Saved data successfully!');
+
       List<String> paths = filePath.split("/");
       String simplifiedPath = '';
       for (int x = 3; x < paths.length; x++) {
@@ -114,7 +143,7 @@ class JsonHelper {
       }
       return simplifiedPath;
     } catch (error) {
-      print('error from export: $error');
+      print('error from export: \n$error');
       throw error;
     }
   }

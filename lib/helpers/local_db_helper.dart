@@ -9,12 +9,12 @@ class LocalDatabase {
     final dbPath = await sql.getDatabasesPath();
 
     return sql.openDatabase(path.join(dbPath, 'localdata.db'),
-        onCreate: (db, version) {
-      db.execute(
+        onCreate: (db, version) async {
+      await db.execute(
           'CREATE TABLE tags(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, tagType TEXT, lastTimeUsed TEXT, isActive INT)');
-      db.execute(
+      await db.execute(
           'CREATE TABLE transactions(id INTEGER PRIMARY KEY AUTOINCREMENT, tagId INT, dateTime TEXT, amount REAL, transactionType TEXT, balanceChange TEXT, description TEXT)');
-      db.execute(
+      await db.execute(
           'CREATE TABLE mini_transactions(id INTEGER PRIMARY KEY AUTOINCREMENT, transactionId INT, name TEXT, amount REAL, balanceChange TEXT)');
 
       // Create Adjustment Tag here while creating db just after tables
@@ -93,5 +93,12 @@ class LocalDatabase {
       String table, int id, Map<String, dynamic> data) async {
     final db = await LocalDatabase.database();
     await db.update(table, data, where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<void> cleanDatabase() async {
+    final db = await LocalDatabase.database();
+    await db.delete('mini_transactions');
+    await db.delete('transactions');
+    await db.delete('tags');
   }
 }

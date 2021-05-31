@@ -61,6 +61,7 @@ class MiniTransactionButton extends StatelessWidget {
   void _onTap(context) {
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           final _key = GlobalKey<FormState>();
           BalanceChange _balanceChange = originalBalanceChange;

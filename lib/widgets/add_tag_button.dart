@@ -34,6 +34,7 @@ class AddTagButton extends StatelessWidget {
         'Add all the relavent keywords of any targeted Tag for better search results!';
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         content: Container(
           height: 140,
