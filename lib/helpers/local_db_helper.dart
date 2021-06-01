@@ -16,15 +16,6 @@ class LocalDatabase {
           'CREATE TABLE transactions(id INTEGER PRIMARY KEY AUTOINCREMENT, tagId INT, dateTime TEXT, amount REAL, transactionType TEXT, balanceChange TEXT, description TEXT)');
       await db.execute(
           'CREATE TABLE mini_transactions(id INTEGER PRIMARY KEY AUTOINCREMENT, transactionId INT, name TEXT, amount REAL, balanceChange TEXT)');
-
-      // Create Adjustment Tag here while creating db just after tables
-      Tag adjustmentTag = Tag(
-        name: 'Adjustment',
-        tagType: TagType.Adjustment,
-        lastTimeUsed: DateTime.now(),
-        isActive: true,
-      );
-      insert('tags', adjustmentTag.toMap());
     }, version: 1);
   }
 

@@ -31,7 +31,7 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           Divider(),
           ListTile(
-            leading: Icon(Icons.import_export),
+            leading: Icon(Icons.history),
             title: Text('Import / Export',
                 style: Theme.of(context).textTheme.subhead),
             onTap: () {

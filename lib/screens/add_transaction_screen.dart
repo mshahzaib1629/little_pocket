@@ -297,6 +297,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                       });
                                   });
                                 },
+                                cursorColor: _pageThemeColor(),
                                 decoration:
                                     AppTheme.inputDecoration(_pageThemeColor())
                                         .copyWith(
@@ -344,6 +345,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildAmountField() {
     return TextFormField(
       controller: _amountTextController,
+      cursorColor: _pageThemeColor(),
       decoration: AppTheme.inputDecoration(_pageThemeColor()).copyWith(
         labelText: 'Amount in Rupees',
         suffix: widget.transactionType == TransactionType.Adjustment
@@ -387,6 +389,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildDescriptionField() {
     return TextField(
+      cursorColor: _pageThemeColor(),
       controller: _descriptionTextController,
       decoration: AppTheme.inputDecoration(_pageThemeColor()).copyWith(
         labelText: 'Description',

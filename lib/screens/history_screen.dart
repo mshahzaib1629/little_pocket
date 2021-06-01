@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hawk_fab_menu/hawk_fab_menu.dart';
 import 'package:little_pocket/helpers/configurations.dart';
 import 'package:little_pocket/helpers/enums.dart';
+import 'package:little_pocket/helpers/local_db_helper.dart';
 import 'package:little_pocket/helpers/styling.dart';
+import 'package:little_pocket/models/tag.dart';
 import 'package:little_pocket/models/transaction.dart';
+import 'package:little_pocket/providers/tag_provider.dart';
 import 'package:little_pocket/providers/transaction_provider.dart';
 import 'package:little_pocket/screens/add_transaction_screen.dart';
 import 'package:little_pocket/screens/app_drawer.dart';
@@ -19,21 +23,44 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  bool _isLoading = false;
+  bool _isLoading = false, upDirection = true, flag = true;
+  List<Transaction> _filteredTransactions = [];
+  final _transactionSearchController = TextEditingController();
+  ScrollController _controller;
   @override
   void initState() {
     super.initState();
     _fetchTransactions();
+    _controller = ScrollController()
+      ..addListener(() {
+        upDirection =
+            _controller.position.userScrollDirection == ScrollDirection.forward;
+        if (upDirection != flag) setState(() {});
+
+        flag = upDirection;
+      });
   }
 
   Future<void> _fetchTransactions() async {
     try {
-      final tagProvider =
+      final transactionProvider =
           Provider.of<TransactionProvider>(context, listen: false);
       setState(() {
         _isLoading = true;
       });
-      await tagProvider.fetchTransactions();
+      await transactionProvider.fetchTransactions().then((value) async {
+        final tagProvider = Provider.of<TagProvider>(context, listen: false);
+        if (await tagProvider.getAdjustmentTagOnly() == null) {
+          Tag adjustmentTag = Tag(
+            name: 'Adjustment',
+            tagType: TagType.Adjustment,
+            lastTimeUsed: DateTime.now(),
+            isActive: true,
+          );
+          await LocalDatabase.insert('tags', adjustmentTag.toMap());
+          print('adjustmentTag added');
+        }
+      });
     } catch (error) {
       print('error from _fetchTransactions: \n$error');
       showDefaultErrorMsg(context, content: error.toString());
@@ -149,9 +176,50 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ];
 
+  List<Widget> _buildTransactionCards(List<Transaction> transactions) {
+    return transactions
+        .map(
+          (trans) => Configs.isEditable(trans)
+              ? Dismissible(
+                  key: Key(trans.id.toString()),
+                  confirmDismiss: (direction) =>
+                      _confirmDismiss(direction, trans),
+                  background: Container(
+                    color: _dismissibleColor(
+                      trans,
+                    ),
+                  ),
+                  onDismissed: (direction) => _onDismissed(direction, trans),
+                  child: Column(
+                    children: [
+                      HistoryCard(trans),
+                      // if (index != _transactions.length - 1)
+                      Divider(
+                        height: 0,
+                        color: Colors.black26,
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  children: [
+                    HistoryCard(trans),
+                    // if (index != _transactions.length - 1)
+                    Divider(
+                      height: 0,
+                      color: Colors.black26,
+                    ),
+                  ],
+                ),
+        )
+        .toList();
+  }
+
   @override
+  // original build func
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Little Pocket'),
       ),
@@ -166,10 +234,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 builder: (context, transactionConsumer, _) {
                   List<Transaction> _transactions =
                       transactionConsumer.myTransactions;
-                  return RefreshIndicator(
-                    onRefresh: _fetchTransactions,
-                    child: _transactions.length == 0
-                        ? ListView(
+                  return _transactions.length == 0
+                      ? RefreshIndicator(
+                          onRefresh: _fetchTransactions,
+                          child: ListView(
                             children: [
                               SizedBox(
                                 height:
@@ -182,50 +250,98 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ),
                               ),
                             ],
-                          )
-                        : ListView.builder(
-                            itemCount: _transactions.length,
-                            itemBuilder: (context, index) => Configs.isEditable(
-                                    _transactions[index])
-                                ? Dismissible(
-                                    key:
-                                        Key(_transactions[index].id.toString()),
-                                    confirmDismiss: (direction) =>
-                                        _confirmDismiss(
-                                            direction, _transactions[index]),
-                                    background: Container(
-                                      color: _dismissibleColor(
-                                        _transactions[index],
-                                      ),
-                                    ),
-                                    onDismissed: (direction) => _onDismissed(
-                                        direction, _transactions[index]),
-                                    child: Column(
-                                      children: [
-                                        HistoryCard(_transactions[index]),
-                                        // if (index != _transactions.length - 1)
-                                        Divider(
-                                          height: 0,
-                                          color: Colors.black26,
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : Column(
-                                    children: [
-                                      HistoryCard(_transactions[index]),
-                                      // if (index != _transactions.length - 1)
-                                      Divider(
-                                        height: 0,
-                                        color: Colors.black26,
-                                      ),
-                                    ],
-                                  ),
                           ),
-                  );
+                        )
+                      : Column(
+                          children: [
+                            if (upDirection)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                  vertical: 4,
+                                ),
+                                color: Theme.of(context)
+                                    .accentColor
+                                    .withOpacity(0.15),
+                                child: TextField(
+                                  controller: _transactionSearchController,
+                                  textCapitalization: TextCapitalization.words,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _filteredTransactions = [];
+                                    });
+                                    _transactions.forEach((element) {
+                                      if (element.tag.name.contains(value))
+                                        setState(() {
+                                          _filteredTransactions.add(element);
+                                        });
+                                    });
+                                  },
+                                  decoration: AppTheme.inputDecoration(
+                                          Theme.of(context).accentColor)
+                                      .copyWith(
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    hintText: 'Search here',
+                                    labelStyle: TextStyle(
+                                      fontSize: 16,
+                                      color: Theme.of(context).accentColor,
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 0),
+                                  ),
+                                ),
+                              ),
+                            Expanded(
+                              child: RefreshIndicator(
+                                onRefresh: _fetchTransactions,
+                                child: ListView(
+                                  controller: _controller,
+                                  children: [
+                                    ..._buildTransactionCards(
+                                        _transactionSearchController
+                                                .text.isEmpty
+                                            ? _transactions
+                                            : _filteredTransactions),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        );
                 },
               ),
       ),
     );
   }
 }
+
+
+// text field code
+// TextField(
+//                                   controller: _transactionSearchController,
+//                                   textCapitalization: TextCapitalization.words,
+//                                   onChanged: (value) {
+//                                     setState(() {
+//                                       _filteredTransactions = [];
+//                                     });
+//                                     _transactions.forEach((element) {
+//                                       if (element.tag.name.contains(value))
+//                                         setState(() {
+//                                           _filteredTransactions.add(element);
+//                                         });
+//                                     });
+//                                   },
+//                                   decoration: AppTheme.inputDecoration(
+//                                           Theme.of(context).accentColor)
+//                                       .copyWith(
+//                                     labelText: 'Search here',
+//                                     labelStyle: TextStyle(
+//                                       fontSize: 16,
+//                                       color: Theme.of(context).accentColor,
+//                                     ),
+//                                     filled: true,
+//                                     contentPadding: EdgeInsets.symmetric(
+//                                         horizontal: 8, vertical: 0),
+//                                   ),
+//                                 ),
