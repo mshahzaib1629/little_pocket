@@ -78,6 +78,7 @@ class MiniTransactionButton extends StatelessWidget {
                         controller: _itemNameController,
                         cursorColor: Theme.of(context).accentColor,
                         textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
                         validator: (value) {
                           if (value.isEmpty) return 'Name should not be empty!';
                           return null;
@@ -115,19 +116,22 @@ class MiniTransactionButton extends StatelessWidget {
                         decoration: AppTheme.inputDecoration(
                                 Theme.of(context).accentColor)
                             .copyWith(
-                          suffix: IconButton(
-                              icon: _balanceChange == BalanceChange.Icrement
-                                  ? Icon(
-                                      Icons.add,
-                                      color: AppTheme.amountIcrementColor,
-                                      size: 18,
-                                    )
-                                  : Icon(
-                                      Icons.remove,
-                                      color: AppTheme.amountDecrementColor,
-                                      size: 18,
-                                    ),
-                              onPressed: () {
+                          suffix: InkWell(
+                              child: Container(
+                                padding: EdgeInsets.all(5),
+                                child: _balanceChange == BalanceChange.Icrement
+                                    ? Icon(
+                                        Icons.add,
+                                        color: AppTheme.amountIcrementColor,
+                                        size: 18,
+                                      )
+                                    : Icon(
+                                        Icons.remove,
+                                        color: AppTheme.amountDecrementColor,
+                                        size: 18,
+                                      ),
+                              ),
+                              onTap: () {
                                 if (_balanceChange == BalanceChange.Icrement)
                                   setState(() {
                                     _balanceChange = BalanceChange.Decrement;

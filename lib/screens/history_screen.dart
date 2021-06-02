@@ -266,12 +266,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 child: TextField(
                                   controller: _transactionSearchController,
                                   textCapitalization: TextCapitalization.words,
+                                  textInputAction: TextInputAction.search,
                                   onChanged: (value) {
                                     setState(() {
                                       _filteredTransactions = [];
                                     });
                                     _transactions.forEach((element) {
-                                      if (element.tag.name.contains(value))
+                                      if (element.tag.name
+                                          .toLowerCase()
+                                          .contains(value.toLowerCase()))
                                         setState(() {
                                           _filteredTransactions.add(element);
                                         });

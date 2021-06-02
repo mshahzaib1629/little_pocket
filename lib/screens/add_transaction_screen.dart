@@ -286,12 +286,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               TextField(
                                 controller: _tagSearchController,
                                 textCapitalization: TextCapitalization.words,
+                                textInputAction: TextInputAction.search,
                                 onChanged: (value) {
                                   setState(() {
                                     filteredTags = [];
                                   });
                                   allTags.forEach((element) {
-                                    if (element.name.contains(value))
+                                    if (element.name
+                                        .toLowerCase()
+                                        .contains(value.toLowerCase()))
                                       setState(() {
                                         filteredTags.add(element);
                                       });
