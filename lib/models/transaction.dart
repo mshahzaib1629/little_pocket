@@ -43,7 +43,7 @@ class Transaction {
       tag: Tag(
         id: transObj['tagId'],
       ),
-      dateTime: DateFormat('yyyy-MM-ddThh:mm:ss', 'en_US')
+      dateTime: DateFormat('yyyy-MM-ddTHH:mm:ss', 'en_US')
           .parse(transObj['dateTime']),
       amount: transObj['amount'],
       transactionType: getEnumValue(

@@ -39,7 +39,7 @@ class Tag {
         type: EnumType.TagType,
         enumString: tagObj['tagType'],
       ),
-      lastTimeUsed: DateFormat('yyyy-MM-ddThh:mm:ss', 'en_US')
+      lastTimeUsed: DateFormat('yyyy-MM-ddTHH:mm:ss', 'en_US')
           .parse(tagObj['lastTimeUsed']),
       isActive: tagObj['isActive'] == 1 ? true : false,
     );

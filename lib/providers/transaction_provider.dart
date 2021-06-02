@@ -69,8 +69,9 @@ class TransactionProvider with ChangeNotifier {
       for (int i = 0; i < transaction.miniTransactionList.length; i++) {
         var miniTrans = transaction.miniTransactionList[i];
         if (miniTrans.id == null)
-          await LocalDatabase.insert(
+          transaction.miniTransactionList[i].id = await LocalDatabase.insert(
               'mini_transactions', miniTrans.toMap(transaction.id));
+        // add this to local miniTransList's targeted item in this transaction locally
         else
           await LocalDatabase.update('mini_transactions', miniTrans.id,
               miniTrans.toMap(transaction.id));

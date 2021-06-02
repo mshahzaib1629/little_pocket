@@ -315,33 +315,3 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 }
-
-
-// text field code
-// TextField(
-//                                   controller: _transactionSearchController,
-//                                   textCapitalization: TextCapitalization.words,
-//                                   onChanged: (value) {
-//                                     setState(() {
-//                                       _filteredTransactions = [];
-//                                     });
-//                                     _transactions.forEach((element) {
-//                                       if (element.tag.name.contains(value))
-//                                         setState(() {
-//                                           _filteredTransactions.add(element);
-//                                         });
-//                                     });
-//                                   },
-//                                   decoration: AppTheme.inputDecoration(
-//                                           Theme.of(context).accentColor)
-//                                       .copyWith(
-//                                     labelText: 'Search here',
-//                                     labelStyle: TextStyle(
-//                                       fontSize: 16,
-//                                       color: Theme.of(context).accentColor,
-//                                     ),
-//                                     filled: true,
-//                                     contentPadding: EdgeInsets.symmetric(
-//                                         horizontal: 8, vertical: 0),
-//                                   ),
-//                                 ),
