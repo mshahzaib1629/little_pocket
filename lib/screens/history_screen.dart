@@ -222,7 +222,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             style: TextStyle(
               color: Theme.of(context).accentColor,
             )),
-        elevation: _isLoading ? 4 : 0,
+        elevation: 0,
         iconTheme: IconThemeData(
           color: Theme.of(context).accentColor,
         ),
@@ -231,95 +231,98 @@ class _HistoryScreenState extends State<HistoryScreen> {
       drawer: AppDrawer(),
       body: HawkFabMenu(
         items: _floatButtonMenuList(context),
-        body: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : Consumer<TransactionProvider>(
-                builder: (context, transactionConsumer, _) {
-                  List<Transaction> _transactions =
-                      transactionConsumer.myTransactions;
-                  return _transactions.length == 0
-                      ? RefreshIndicator(
-                          onRefresh: _fetchTransactions,
-                          child: ListView(
-                            children: [
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height / 2.5,
-                              ),
-                              Center(
-                                child: Text(
-                                  'Seems no record exists!',
-                                  style: AppTheme.emptyPageTextStyle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            // if (upDirection)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(color: Colors.white,
+        body: Consumer<TransactionProvider>(
+          builder: (context, transactionConsumer, _) {
+            List<Transaction> _transactions =
+                transactionConsumer.myTransactions;
+            return Column(
+              children: [
+                // if (upDirection)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(color: Colors.white,
 
-                                  // .withOpacity(0.15),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      offset: Offset(0.0, 5),
-                                      blurRadius: 6,
+                      // .withOpacity(0.15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(0.0, 5),
+                          blurRadius: 6,
+                        ),
+                        BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(0.0, -5),
+                          blurRadius: 6,
+                        ),
+                      ]),
+                  child: TextField(
+                    controller: _transactionSearchController,
+                    textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.search,
+                    onChanged: (value) {
+                      setState(() {
+                        _filteredTransactions = [];
+                      });
+                      _transactions.forEach((element) {
+                        if (element.tag.name
+                                .toLowerCase()
+                                .contains(value.toLowerCase()) ||
+                            element.description
+                                .toLowerCase()
+                                .contains(value.toLowerCase()) ||
+                            _isInMiniTable(element, value))
+                          setState(() {
+                            _filteredTransactions.add(element);
+                          });
+                      });
+                    },
+                    decoration:
+                        AppTheme.inputDecoration(Theme.of(context).accentColor)
+                            .copyWith(
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      hintText: 'Search here',
+                      labelStyle: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).accentColor,
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                    ),
+                  ),
+                ),
+                _isLoading
+                    ? Padding(
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height / 3.5,
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : Expanded(
+                        child: RefreshIndicator(
+                          onRefresh: _fetchTransactions,
+                          child: _transactions.isEmpty
+                              ? ListView(
+                                  children: [
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              3.5,
                                     ),
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      offset: Offset(0.0, -5),
-                                      blurRadius: 6,
+                                    Center(
+                                      child: Text(
+                                        'Seems no record exists!',
+                                        style: AppTheme.emptyPageTextStyle,
+                                      ),
                                     ),
-                                  ]),
-                              child: TextField(
-                                controller: _transactionSearchController,
-                                textCapitalization: TextCapitalization.words,
-                                textInputAction: TextInputAction.search,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _filteredTransactions = [];
-                                  });
-                                  _transactions.forEach((element) {
-                                    if (element.tag.name
-                                            .toLowerCase()
-                                            .contains(value.toLowerCase()) ||
-                                        element.description
-                                            .toLowerCase()
-                                            .contains(value.toLowerCase()) ||
-                                        _isInMiniTable(element, value))
-                                      setState(() {
-                                        _filteredTransactions.add(element);
-                                      });
-                                  });
-                                },
-                                decoration: AppTheme.inputDecoration(
-                                        Theme.of(context).accentColor)
-                                    .copyWith(
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  hintText: 'Search here',
-                                  labelStyle: TextStyle(
-                                    fontSize: 16,
-                                    color: Theme.of(context).accentColor,
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 0),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: RefreshIndicator(
-                                onRefresh: _fetchTransactions,
-                                child: ListView(
+                                  ],
+                                )
+                              : ListView(
                                   // controller: _scrollControllerontroller,
                                   children: [
                                     ..._buildTransactionCards(
@@ -329,12 +332,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             : _filteredTransactions),
                                   ],
                                 ),
-                              ),
-                            )
-                          ],
-                        );
-                },
-              ),
+                        ),
+                      )
+              ],
+            );
+          },
+        ),
       ),
     );
   }

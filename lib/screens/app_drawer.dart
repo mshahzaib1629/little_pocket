@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:little_pocket/screens/history_screen.dart';
-import 'package:little_pocket/screens/impot_export_screen.dart';
+import 'package:little_pocket/screens/settings_screen.dart';
 import 'package:little_pocket/screens/tags_screen.dart';
 
 class AppDrawer extends StatefulWidget {
@@ -31,14 +31,11 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           Divider(),
           ListTile(
-            leading: Icon(Icons.history),
-            title: Text('Import / Export',
-                style: Theme.of(context).textTheme.subhead),
+            leading: Icon(Icons.settings),
+            title: Text('Settings', style: Theme.of(context).textTheme.subhead),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ImportExportScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingScreen()));
             },
           ),
         ],

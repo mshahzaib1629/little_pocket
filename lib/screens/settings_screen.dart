@@ -7,8 +7,8 @@ import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/default_snack_bar.dart';
 import 'package:provider/provider.dart';
 
-class ImportExportScreen extends StatelessWidget {
-  const ImportExportScreen({Key key}) : super(key: key);
+class SettingScreen extends StatelessWidget {
+  const SettingScreen({Key key}) : super(key: key);
 
   Future<void> _onImportPressed(BuildContext context) async {
     try {
@@ -77,14 +77,14 @@ class ImportExportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Import / Export'),
+        title: Text('Settings'),
       ),
       body: Center(
         child: Column(
           children: [
             ListTile(
               onTap: () => _onImportPressed(context),
-              title: Text('Import',
+              title: Text('Import Data',
                   style: TextStyle(
                     color: Theme.of(context).accentColor,
                   )),
@@ -94,12 +94,12 @@ class ImportExportScreen extends StatelessWidget {
             Divider(),
             ListTile(
               onTap: () => _onExportPressed(context),
-              title: Text('Export',
+              title: Text('Export Data',
                   style: TextStyle(
                     color: Theme.of(context).accentColor,
                   )),
-              subtitle:
-                  Text('Exported file will be in directory:\n /Little Pocket/'),
+              subtitle: Text(
+                  'Exported files will be in directory:\n /Little Pocket/'),
             ),
           ],
         ),
