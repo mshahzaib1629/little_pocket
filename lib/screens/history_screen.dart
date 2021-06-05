@@ -14,6 +14,7 @@ import 'package:little_pocket/screens/app_drawer.dart';
 import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/history_card.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_search_bar/flutter_search_bar.dart';
 
 class HistoryScreen extends StatefulWidget {
   HistoryScreen({Key key}) : super(key: key);
@@ -23,22 +24,23 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  bool _isLoading = false, upDirection = true, flag = true;
+  bool _isLoading = false;
+  // bool upDirection = true, flag = true;
   List<Transaction> _filteredTransactions = [];
   final _transactionSearchController = TextEditingController();
-  ScrollController _controller;
+  // ScrollController _scrollControllerontroller;
   @override
   void initState() {
     super.initState();
     _fetchTransactions();
-    _controller = ScrollController()
-      ..addListener(() {
-        upDirection =
-            _controller.position.userScrollDirection == ScrollDirection.forward;
-        if (upDirection != flag) setState(() {});
+    // _scrollControllerontroller = ScrollController()
+    //   ..addListener(() {
+    //     upDirection = _scrollControllerontroller.position.userScrollDirection ==
+    //         ScrollDirection.forward;
+    //     if (upDirection != flag) setState(() {});
 
-        flag = upDirection;
-      });
+    //     flag = upDirection;
+    //   });
   }
 
   Future<void> _fetchTransactions() async {
@@ -178,41 +180,36 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   List<Widget> _buildTransactionCards(List<Transaction> transactions) {
     return transactions
-        .map(
-          (trans) => Configs.isEditable(trans)
-              ? Dismissible(
-                  key: Key(trans.id.toString()),
-                  confirmDismiss: (direction) =>
-                      _confirmDismiss(direction, trans),
-                  background: Container(
-                    color: _dismissibleColor(
-                      trans,
-                    ),
-                  ),
-                  onDismissed: (direction) => _onDismissed(direction, trans),
-                  child: Column(
-                    children: [
-                      HistoryCard(trans),
-                      // if (index != _transactions.length - 1)
-                      Divider(
-                        height: 0,
-                        color: Colors.black26,
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
-                  children: [
-                    HistoryCard(trans),
-                    // if (index != _transactions.length - 1)
-                    Divider(
-                      height: 0,
-                      color: Colors.black26,
-                    ),
-                  ],
+        .map((trans) => Dismissible(
+              key: Key(trans.id.toString()),
+              confirmDismiss: (direction) => _confirmDismiss(direction, trans),
+              background: Container(
+                color: _dismissibleColor(
+                  trans,
                 ),
-        )
+              ),
+              onDismissed: (direction) => _onDismissed(direction, trans),
+              child: Column(
+                children: [
+                  HistoryCard(trans),
+                  // if (index != _transactions.length - 1)
+                  Divider(
+                    height: 0,
+                    color: Colors.black26,
+                  ),
+                ],
+              ),
+            ))
         .toList();
+  }
+
+  bool _isInMiniTable(Transaction transaction, String searchValue) {
+    bool result = false;
+    transaction.miniTransactionList.forEach((mini) {
+      if (mini.name.toLowerCase().contains(searchValue.toLowerCase()))
+        result = true;
+    });
+    return result;
   }
 
   @override
@@ -221,7 +218,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Little Pocket'),
+        title: Text('Little Pocket',
+            style: TextStyle(
+              color: Theme.of(context).accentColor,
+            )),
+        elevation: _isLoading ? 4 : 0,
+        iconTheme: IconThemeData(
+          color: Theme.of(context).accentColor,
+        ),
+        backgroundColor: Colors.white,
       ),
       drawer: AppDrawer(),
       body: HawkFabMenu(
@@ -254,52 +259,68 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         )
                       : Column(
                           children: [
-                            if (upDirection)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                  vertical: 4,
-                                ),
-                                color: Theme.of(context)
-                                    .accentColor
-                                    .withOpacity(0.15),
-                                child: TextField(
-                                  controller: _transactionSearchController,
-                                  textCapitalization: TextCapitalization.words,
-                                  textInputAction: TextInputAction.search,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _filteredTransactions = [];
-                                    });
-                                    _transactions.forEach((element) {
-                                      if (element.tag.name
-                                          .toLowerCase()
-                                          .contains(value.toLowerCase()))
-                                        setState(() {
-                                          _filteredTransactions.add(element);
-                                        });
-                                    });
-                                  },
-                                  decoration: AppTheme.inputDecoration(
-                                          Theme.of(context).accentColor)
-                                      .copyWith(
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    hintText: 'Search here',
-                                    labelStyle: TextStyle(
-                                      fontSize: 16,
-                                      color: Theme.of(context).accentColor,
+                            // if (upDirection)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(color: Colors.white,
+
+                                  // .withOpacity(0.15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      offset: Offset(0.0, 5),
+                                      blurRadius: 6,
                                     ),
-                                    contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 0),
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      offset: Offset(0.0, -5),
+                                      blurRadius: 6,
+                                    ),
+                                  ]),
+                              child: TextField(
+                                controller: _transactionSearchController,
+                                textCapitalization: TextCapitalization.words,
+                                textInputAction: TextInputAction.search,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _filteredTransactions = [];
+                                  });
+                                  _transactions.forEach((element) {
+                                    if (element.tag.name
+                                            .toLowerCase()
+                                            .contains(value.toLowerCase()) ||
+                                        element.description
+                                            .toLowerCase()
+                                            .contains(value.toLowerCase()) ||
+                                        _isInMiniTable(element, value))
+                                      setState(() {
+                                        _filteredTransactions.add(element);
+                                      });
+                                  });
+                                },
+                                decoration: AppTheme.inputDecoration(
+                                        Theme.of(context).accentColor)
+                                    .copyWith(
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  hintText: 'Search here',
+                                  labelStyle: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).accentColor,
                                   ),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 0),
                                 ),
                               ),
+                            ),
                             Expanded(
                               child: RefreshIndicator(
                                 onRefresh: _fetchTransactions,
                                 child: ListView(
-                                  controller: _controller,
+                                  // controller: _scrollControllerontroller,
                                   children: [
                                     ..._buildTransactionCards(
                                         _transactionSearchController

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:little_pocket/helpers/json_handler.dart';
 import 'package:little_pocket/helpers/manual_exception.dart';
+import 'package:little_pocket/helpers/styling.dart';
 import 'package:little_pocket/providers/transaction_provider.dart';
 import 'package:little_pocket/widgets/default_error_dialog.dart';
 import 'package:little_pocket/widgets/default_snack_bar.dart';
@@ -80,23 +81,26 @@ class ImportExportScreen extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20)),
-              onPressed: () => _onImportPressed(context),
-              child: Text('Import'),
+            ListTile(
+              onTap: () => _onImportPressed(context),
+              title: Text('Import',
+                  style: TextStyle(
+                    color: Theme.of(context).accentColor,
+                  )),
+              subtitle: Text(
+                  'On importing external data, current data will be lost.'),
             ),
-            SizedBox(
-              height: 15,
+            Divider(),
+            ListTile(
+              onTap: () => _onExportPressed(context),
+              title: Text('Export',
+                  style: TextStyle(
+                    color: Theme.of(context).accentColor,
+                  )),
+              subtitle:
+                  Text('Exported file will be in directory:\n /Little Pocket/'),
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20)),
-              onPressed: () => _onExportPressed(context),
-              child: Text('Export'),
-            )
           ],
         ),
       ),

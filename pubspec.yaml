@@ -35,6 +35,7 @@ dependencies:
   path_provider: ^2.0.2
   permission_handler: ^8.0.0+2
   file_picker: ^3.0.2+2
+  flutter_search_bar: ^2.1.0
 
 dev_dependencies:
   flutter_test:
