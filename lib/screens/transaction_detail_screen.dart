@@ -175,8 +175,7 @@ class _TransactionDetailScreenState extends State<TransactionDetailScreen> {
         ),
         backgroundColor: _pageThemeColor(),
         actions: [
-          if (Configs.isEditable(widget.transaction) &&
-              widget.transaction.transactionType != TransactionType.Adjustment)
+          if (widget.transaction.transactionType != TransactionType.Adjustment)
             IconButton(icon: Icon(Icons.edit), onPressed: _onEditPressed)
         ],
       ),

@@ -1,4 +1,4 @@
-package com.example.little_pocket
+package com.mshahzaib.little_pocket
 
 import io.flutter.embedding.android.FlutterActivity
 
